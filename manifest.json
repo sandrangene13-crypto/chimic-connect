@@ -1,0 +1,17 @@
+{
+  "name": "Chimik Connect",
+  "short_name": "Chimik",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#142B52",
+  "theme_color": "#142B52",
+  "description": "Secure messaging and community app for Chimik Connect.",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

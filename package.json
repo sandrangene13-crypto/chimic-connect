@@ -1,0 +1,30 @@
+{
+  "name": "chimic-connect",
+  "version": "2.0.0",
+  "description": "Chimic Connect - Modern real-time messaging platform",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node --test"
+  },
+  "keywords": [
+    "chimic-connect",
+    "messaging",
+    "chat",
+    "express",
+    "socket.io",
+    "sqlite",
+    "real-time"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^18.0.10",
+    "express": "^4.21.2",
+    "express-rate-limit": "^8.7.4",
+    "helmet": "^8.3.0",
+    "socket.io": "^4.8.1",
+    "sql.js": "^1.13.0"
+  }
+}

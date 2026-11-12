@@ -1,0 +1,4018 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#142B52" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>Chimic Connect</title>
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+      :root {
+        --bg-main: #142B52;
+        --bg-panel: rgba(18, 31, 56, 0.94);
+        --bg-soft: #EAF2FF;
+        --bg-chat: #0f1d35;
+        --bg-light: #F7F9FC;
+        --surface: #ffffff;
+        --text-primary: #F7F9FC;
+        --text-muted: #D7E4FF;
+        --text-dark: #142B52;
+        --accent: #3478F6;
+        --accent-strong: #255fe0;
+        --accent-soft: rgba(52, 120, 246, 0.12);
+        --aqua: #36CFC9;
+        --incoming: rgba(17, 29, 46, 0.98);
+        --outgoing: linear-gradient(135deg, #3478F6, #2d69d6);
+        --border: rgba(255,255,255,0.09);
+        --shadow: 0 18px 48px rgba(13, 23, 40, 0.28);
+      }
+
+      * { box-sizing: border-box; }
+      html, body {
+        margin: 0;
+        min-height: 100%;
+        font-family: 'Segoe UI', sans-serif;
+        background:
+          radial-gradient(circle at top left, rgba(25,212,169,0.18), transparent 30%),
+          radial-gradient(circle at bottom right, rgba(0,120,255,0.08), transparent 35%),
+          var(--bg-main);
+        color: var(--text-primary);
+      }
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 0;
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+      }
+      button, input, select, textarea { font: inherit; }
+      button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, [role="button"]:focus-visible {
+        outline: 3px solid rgba(54,207,201,.8);
+        outline-offset: 2px;
+      }
+      button:disabled { opacity: .6; cursor: not-allowed; transform: none !important; }
+      .hidden { display: none !important; }
+
+      .auth-shell {
+        position: relative;
+        width: min(440px, 100%);
+        background: rgba(10, 20, 38, 0.8);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 26px;
+        padding: 30px 28px 24px;
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(16px);
+        margin: 0 auto;
+      }
+      .auth-shell::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: linear-gradient(135deg, rgba(52,120,246,0.18), transparent 38%, rgba(54,207,201,0.12));
+        pointer-events: none;
+      }
+      .auth-shell > * { position: relative; z-index: 1; }
+
+      .brand {
+        display: flex; align-items: center; justify-content: center; gap: 12px;
+        margin-bottom: 12px;
+        font-size: 2.35rem;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        color: #dfeeff;
+        text-shadow: 0 0 20px rgba(52,120,246,0.35);
+      }
+
+      .subtitle {
+        text-align: center;
+        color: var(--text-muted);
+        margin: 0 0 22px;
+        font-size: 0.9rem;
+        letter-spacing: 0.04em;
+      }
+
+      .form-stack { display: flex; flex-direction: column; gap: 12px; }
+      .field {
+        width: 100%;
+        padding: 13px 14px;
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.08);
+        background: rgba(9,18,17,0.9);
+        color: var(--text-primary);
+        transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+      }
+      .field::placeholder { color: var(--text-muted); }
+      .field:focus {
+        outline: none;
+        border-color: rgba(25,212,169,0.7);
+        box-shadow: 0 0 0 4px rgba(25,212,169,0.12);
+        transform: translateY(-1px);
+      }
+
+      .primary-btn, .secondary-btn, .danger-btn {
+        width: 100%;
+        border: none;
+        border-radius: 12px;
+        padding: 13px 18px;
+        cursor: pointer;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        transition: 0.2s ease;
+      }
+      .primary-btn {
+        background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+        color: white;
+        box-shadow: 0 12px 24px rgba(52,120,246,0.32);
+      }
+      .primary-btn:hover { transform: translateY(-1px); filter: brightness(1.05); }
+      .secondary-btn {
+        background: rgba(52,120,246,0.08);
+        color: #eaf2ff;
+        border: 1px solid rgba(52,120,246,0.45);
+      }
+      .secondary-btn:hover { background: rgba(52,120,246,0.14); }
+      .danger-btn {
+        background: linear-gradient(135deg, #ff7a7a, #d94f4f);
+        color: white;
+      }
+
+      .switch {
+        text-align: center;
+        margin-top: 16px;
+        color: var(--text-muted);
+        font-size: 0.92rem;
+      }
+      .switch span {
+        color: var(--accent);
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .app-shell {
+        display: flex;
+        width: 100vw;
+        height: 100vh;
+        background: transparent;
+      }
+
+      .sidebar {
+        width: 365px;
+        background: linear-gradient(180deg, rgba(18, 26, 42, 0.96), rgba(10, 17, 30, 0.94));
+        border-right: 1px solid rgba(255,255,255,0.08);
+        display: flex;
+        flex-direction: column;
+        box-shadow: inset -1px 0 0 rgba(255,255,255,0.02);
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 18px;
+        background: rgba(18, 31, 56, 0.82);
+        border-bottom: 1px solid var(--border);
+      }
+      .avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid rgba(255,255,255,0.12);
+        box-shadow: 0 0 0 3px rgba(25,212,169,0.1);
+      }
+      .toolbar {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        color: var(--text-muted);
+        font-size: 1.02rem;
+      }
+      .toolbar i {
+        cursor: pointer;
+        transition: 0.2s ease;
+        width: 30px;
+        height: 30px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+      }
+      .toolbar i:hover {
+        color: #dfeeff;
+        background: rgba(255,255,255,0.05);
+        transform: translateY(-1px);
+      }
+
+      .search-box {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--border);
+        background: rgba(7, 13, 12, 0.45);
+      }
+      .search-box input {
+        flex: 1;
+        background: transparent;
+        border: none;
+        outline: none;
+        color: var(--text-primary);
+        font-size: 0.96rem;
+      }
+
+      .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0,1fr));
+        gap: 8px;
+        padding: 12px 14px 0;
+      }
+      .shortcut-btn {
+        border: 1px solid rgba(52,120,246,0.28);
+        background: rgba(52,120,246,0.08);
+        color: var(--text-primary);
+        border-radius: 10px;
+        padding: 9px 8px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .shortcut-btn:hover {
+        background: rgba(52,120,246,0.16);
+      }
+      .mini-panel {
+        margin: 12px 14px 0;
+        background: rgba(255,255,255,0.02);
+        border: 1px solid rgba(255,255,255,0.05);
+        border-radius: 12px;
+        padding: 10px 12px;
+      }
+      .mini-panel h4 {
+        margin: 0 0 8px;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+      .mini-panel .stat-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.8rem;
+        padding: 4px 0;
+      }
+      .mini-panel .stat-row strong {
+        color: var(--accent);
+      }
+
+      .contacts {
+        overflow-y: auto;
+        flex: 1;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(52,120,246,0.45) transparent;
+      }
+      .contacts::-webkit-scrollbar { width: 8px; }
+      .contacts::-webkit-scrollbar-thumb {
+        background: rgba(52,120,246,0.35);
+        border-radius: 999px;
+      }
+      .contact-item {
+        display: flex;
+        gap: 12px;
+        padding: 12px 14px;
+        border-bottom: 1px solid rgba(255,255,255,0.04);
+        cursor: pointer;
+        transition: 0.2s ease;
+        position: relative;
+        align-items: center;
+      }
+      .contact-item.active {
+        background: rgba(52,120,246,0.14);
+        border-left: 3px solid var(--accent);
+        padding-left: 11px;
+      }
+      .contact-item:hover { background: rgba(255,255,255,0.03); }
+      .contact-meta { flex: 1; min-width: 0; }
+      .contact-name-row { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+      .contact-name { margin: 0; font-size: 1rem; }
+      .contact-status {
+        margin: 3px 0 0;
+        font-size: 0.79rem;
+        color: var(--text-muted);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .contact-time { font-size: 0.72rem; color: var(--text-muted); }
+      .contact-preview {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 4px;
+        gap: 10px;
+      }
+      .contact-preview span {
+        color: var(--text-muted);
+        font-size: 0.76rem;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        max-width: 170px;
+      }
+      .unread-badge {
+        background: var(--accent);
+        color: #fff;
+        border-radius: 999px;
+        min-width: 20px;
+        height: 20px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.67rem;
+        font-weight: 700;
+        padding: 0 6px;
+      }
+      .online-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: #38d39f;
+        display: inline-block;
+        box-shadow: 0 0 0 3px rgba(56, 211, 159, 0.2);
+      }
+      .contact-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        margin-left: auto;
+      }
+      .mini-action {
+        background: transparent;
+        border: none;
+        color: var(--text-muted);
+        font-size: 0.8rem;
+        cursor: pointer;
+      }
+      .filter-row {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 6px;
+        margin: 12px 14px 0;
+      }
+      .filter-row button {
+        border: 1px solid rgba(52,120,246,0.18);
+        background: rgba(255,255,255,0.02);
+        color: var(--text-muted);
+        border-radius: 10px;
+        padding: 8px 6px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.2s ease;
+      }
+      .filter-row button:hover,
+      .filter-row button.active {
+        background: rgba(52,120,246,0.18);
+        color: var(--text-primary);
+        border-color: rgba(52,120,246,0.32);
+      }
+
+      .chat-panel {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background: rgba(11, 24, 23, 0.88);
+        min-width: 0;
+      }
+      .chat-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 18px;
+        background: rgba(25, 41, 38, 0.9);
+        border-bottom: 1px solid var(--border);
+      }
+      .chat-user {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .chat-user h3 { margin: 0; font-size: 1.08rem; }
+      .chat-user small { color: var(--text-muted); }
+      .chat-actions {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        color: var(--text-muted);
+        font-size: 1.08rem;
+      }
+      .chat-actions i { cursor: pointer; transition: 0.2s ease; }
+      .chat-actions i:hover { color: var(--text-primary); }
+
+      .messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px 24px;
+        background:
+          linear-gradient(180deg, rgba(8,27,22,0.85), rgba(8,27,22,0.78)),
+          radial-gradient(circle at top, rgba(52,120,246,0.08), transparent 55%);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .welcome-state {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        padding: 32px 20px;
+      }
+      .welcome-card {
+        width: min(460px, 100%);
+        background: rgba(20, 43, 82, 0.5);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 22px;
+        padding: 28px 22px;
+        text-align: center;
+        box-shadow: 0 18px 40px rgba(15,29,53,0.22);
+      }
+      .welcome-card img {
+        width: 76px;
+        height: 76px;
+        border-radius: 50%;
+        margin-bottom: 12px;
+      }
+      .welcome-card h3 {
+        margin: 0 0 8px;
+        font-size: 1.4rem;
+      }
+      .welcome-card p {
+        margin: 0 0 18px;
+        color: var(--text-muted);
+      }
+      .welcome-card .primary-btn {
+        width: auto;
+        min-width: 180px;
+      }
+      .welcome-state {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        padding: 32px 20px;
+      }
+      .welcome-card {
+        width: min(480px, 100%);
+        background: rgba(20, 43, 82, 0.5);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 22px;
+        padding: 28px 22px;
+        text-align: center;
+      }
+      .welcome-card img {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        margin-bottom: 12px;
+      }
+      .welcome-card h3 {
+        margin: 0 0 6px;
+        font-size: 1.4rem;
+      }
+      .welcome-card p {
+        margin: 0;
+        color: var(--text-muted);
+      }
+      .bubble {
+        max-width: 72%;
+        padding: 11px 13px 10px;
+        border-radius: 18px;
+        line-height: 1.45;
+        box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+        word-break: break-word;
+      }
+      .bubble.incoming {
+        align-self: flex-start;
+        background: rgba(28, 42, 39, 0.95);
+        border-top-left-radius: 6px;
+      }
+      .bubble.outgoing {
+        align-self: flex-end;
+        background: linear-gradient(135deg, #3478F6, #285fdb);
+        color: #f7f9fc;
+        border-top-right-radius: 6px;
+      }
+      .bubble small {
+        display: block;
+        margin-top: 7px;
+        opacity: 0.8;
+        font-size: 0.68rem;
+      }
+      .attachment-card { min-width: min(250px, 68vw); }
+      .attachment-top, .attachment-bottom { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+      .attachment-top { margin-bottom: 8px; }
+      .attachment-bottom { margin-top: 8px; }
+      .attachment-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .media-action { border: 1px solid rgba(255,255,255,.2); border-radius: 8px; background: rgba(255,255,255,.1); color: inherit; padding: 6px 9px; cursor: pointer; }
+      .attachment-preview { display: block; width: min(260px, 68vw); max-height: 260px; object-fit: contain; border-radius: 10px; background: rgba(0,0,0,.2); }
+      .attachment-audio { width: min(280px, 70vw); max-width: 100%; }
+      .media-progress { min-height: 1em; color: var(--text-muted); font-size: .75rem; }
+      .recording-status { display: flex; align-items: center; justify-content: center; gap: 9px; margin: 16px 0; font-variant-numeric: tabular-nums; }
+      .recording-dot { width: 10px; height: 10px; border-radius: 50%; background: #f04e5e; box-shadow: 0 0 0 5px rgba(240,78,94,.16); }
+      .recording-controls { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px; }
+      .recording-preview { width: 100%; margin: 12px 0; }
+      .status-editor { width: min(560px, 94vw); max-height: min(88dvh, 760px); overflow-y: auto; }
+      .status-editor textarea, .status-editor select, .status-editor input[type="url"] { width: 100%; margin-top: 10px; }
+      .status-tools { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 7px; margin-top: 10px; }
+      .status-tool { min-width: 0; padding: 9px 5px; border: 1px solid rgba(255,255,255,.12); border-radius: 9px; background: rgba(255,255,255,.06); color: var(--text-primary); cursor: pointer; }
+      .status-preview { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+      .status-preview img, .status-preview video { width: 100px; height: 100px; object-fit: cover; border-radius: 9px; background: #09111d; }
+      .status-viewer { width: min(560px, 94vw); max-height: 88dvh; overflow-y: auto; }
+      .status-viewer-media { width: 100%; max-height: 58dvh; object-fit: contain; margin-top: 12px; background: #080d15; border-radius: 10px; }
+      .status-viewer-actions { display: flex; gap: 8px; margin-top: 14px; }
+      .composer { padding-bottom: env(safe-area-inset-bottom, 0px); }
+
+      .composer-shell {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 12px 14px 14px;
+        background: rgba(25, 41, 38, 0.92);
+        border-top: 1px solid var(--border);
+      }
+      .reply-preview,
+      .upload-preview {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        background: rgba(52,120,246,0.08);
+        border: 1px solid rgba(52,120,246,0.2);
+        border-radius: 12px;
+        padding: 8px 10px;
+        color: var(--text-muted);
+        font-size: 0.76rem;
+      }
+      .reply-preview.hidden,
+      .upload-preview.hidden { display: none; }
+      .composer {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .composer input {
+        flex: 1;
+        border: 1px solid rgba(255,255,255,0.04);
+        border-radius: 14px;
+        padding: 12px 14px;
+        background: rgba(8,17,16,0.9);
+        color: var(--text-primary);
+      }
+      .compose-icon {
+        color: #eaf2ff;
+        cursor: pointer;
+        font-size: 1.2rem;
+        background: linear-gradient(135deg, rgba(52,120,246,0.17), rgba(54,207,201,0.14));
+        border: 1px solid rgba(54,207,201,0.2);
+        width: 38px;
+        height: 38px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        transition: 0.2s ease;
+        box-shadow: 0 8px 16px rgba(52,120,246,0.1);
+      }
+      .compose-icon:hover {
+        transform: translateY(-1px) scale(1.03);
+        background: linear-gradient(135deg, rgba(52,120,246,0.26), rgba(54,207,201,0.22));
+      }
+      .send-btn {
+        background: linear-gradient(135deg, var(--accent), var(--aqua));
+        border: none;
+        color: #f7f9fc;
+        width: 45px;
+        height: 45px;
+        border-radius: 14px;
+        font-size: 1.2rem;
+        cursor: pointer;
+        box-shadow: 0 12px 20px rgba(52,120,246,0.28);
+        transition: 0.2s ease;
+      }
+      .send-btn:hover {
+        transform: translateY(-1px) scale(1.03);
+        box-shadow: 0 16px 26px rgba(52,120,246,0.36);
+      }
+
+      .status-panel {
+        position: fixed;
+        inset: 0 auto 0 0;
+        width: 320px;
+        background: rgba(17, 31, 28, 0.96);
+        border-right: 1px solid var(--border);
+        z-index: 30;
+        display: flex;
+        flex-direction: column;
+        box-shadow: var(--shadow);
+      }
+      .status-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 18px 16px;
+        background: rgba(9, 18, 17, 0.8);
+        border-bottom: 1px solid var(--border);
+      }
+      .status-body { flex: 1; overflow-y: auto; padding: 16px; }
+      .status-item {
+        display: flex;
+        gap: 12px;
+        padding: 10px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+      }
+      .status-item p {
+        margin: 4px 0 0;
+        color: var(--text-muted);
+        font-size: 0.8rem;
+      }
+
+      .mobile-back,
+      .mobile-back-button {
+        display: none;
+        align-items: center;
+        gap: 8px;
+        border: none;
+        background: transparent;
+        color: inherit;
+        font-size: 16px;
+        font-weight: 600;
+        padding: 10px;
+        cursor: pointer;
+        flex-shrink: 0;
+      }
+      .mobile-back {
+        position: fixed;
+        top: 18px;
+        left: 18px;
+        z-index: 60;
+        border: 1px solid rgba(255,255,255,0.15);
+        background: rgba(18,31,56,0.9);
+        color: white;
+        border-radius: 10px;
+        padding: 8px 12px;
+        box-shadow: 0 8px 18px rgba(0,0,0,0.2);
+      }
+
+      .modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(2,6,5,0.76);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 50;
+      }
+      .modal-card {
+        background: linear-gradient(180deg, rgba(20, 43, 82, 0.98), rgba(13, 29, 56, 0.98));
+        border-radius: 18px;
+        padding: 24px;
+        width: min(420px, 90vw);
+        border: 1px solid rgba(255,255,255,0.06);
+        box-shadow: var(--shadow);
+      }
+      .video-wrap {
+        width: 100%;
+        height: 240px;
+        background: linear-gradient(160deg, #031a17, #0d1d1c 60%, #041410);
+        border-radius: 14px;
+        overflow: hidden;
+        margin: 18px 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(25,212,169,0.25);
+      }
+      video { width: 100%; height: 100%; object-fit: cover; }
+      .modal-actions { display: flex; gap: 10px; }
+
+      .mobile-bottom-nav {
+        display: none;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 40;
+        background: rgba(16, 24, 38, 0.96);
+        border-top: 1px solid rgba(255,255,255,0.08);
+        backdrop-filter: blur(12px);
+        padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+        box-shadow: 0 -8px 20px rgba(0,0,0,0.16);
+      }
+      .mobile-bottom-nav .nav-row {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 6px;
+      }
+      .mobile-bottom-nav button {
+        border: none;
+        background: transparent;
+        color: var(--text-muted);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        font-size: 0.7rem;
+        padding: 8px 6px;
+        border-radius: 12px;
+        cursor: pointer;
+      }
+      .mobile-bottom-nav button.active {
+        background: rgba(52,120,246,0.18);
+        color: var(--text-primary);
+      }
+      .help-list {
+        display: grid;
+        gap: 10px;
+        margin-top: 18px;
+      }
+      .help-item {
+        border: 1px solid rgba(255,255,255,0.08);
+        background: rgba(255,255,255,0.03);
+        border-radius: 12px;
+        padding: 12px;
+      }
+      .help-item strong {
+        display: block;
+        margin-bottom: 4px;
+      }
+
+      @media (max-width: 820px) {
+        body { padding: 14px; }
+        .app-shell { flex-direction: column; height: auto; }
+        .sidebar { width: 100%; max-height: 260px; }
+        .chat-panel { min-height: 58vh; }
+        .status-panel { width: min(88vw, 320px); }
+        .mobile-back-button { display: inline-flex; }
+        .mobile-bottom-nav { display: block; }
+        .app-shell {
+          padding-bottom: 76px;
+        }
+        .recording-controls button { padding: 10px 5px; font-size: .82rem; }
+        .status-viewer-actions { flex-wrap: wrap; }
+        .status-viewer-actions button { flex: 1 1 40%; }
+        .composer-shell { position: sticky; bottom: calc(60px + env(safe-area-inset-bottom, 0px)); z-index: 20; }
+      }
+      @media (max-width: 820px) {
+        body {
+          align-items: stretch;
+          justify-content: stretch;
+          padding: 0;
+          min-height: 100dvh;
+        }
+        .app-shell {
+          width: 100%;
+          height: 100dvh;
+          min-height: 100dvh;
+          padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+          overflow: hidden;
+        }
+        .mobile-bottom-nav { display: block; }
+        .mobile-back { display: inline-flex; }
+        body.chat-open .mobile-back { top: calc(env(safe-area-inset-top, 0px) + 8px); }
+        .chat-header { min-height: 64px; }
+        .messages { padding: 14px 12px; }
+        .composer-shell { position: sticky; bottom: 0; z-index: 25; }
+        .composer { gap: 7px; }
+        .composer input { min-width: 0; }
+        .compose-icon { width: 36px; height: 36px; flex: 0 0 36px; }
+        .send-btn { width: 42px; height: 42px; flex: 0 0 42px; }
+        .chat-actions { gap: 12px; }
+        .status-panel { width: min(92vw, 360px); }
+        .modal { padding: 12px; }
+        .modal-card { max-height: calc(100dvh - 24px); overflow-y: auto; }
+        .sidebar {
+          width: 100%;
+          height: 100%;
+          max-height: none;
+          min-height: 0;
+        }
+        .contacts {
+          min-height: 0;
+        }
+        .chat-panel {
+          display: none;
+          height: 100%;
+          min-height: 0;
+        }
+        body.chat-open .sidebar {
+          display: none;
+        }
+        body.chat-open .chat-panel {
+          display: flex;
+          width: 100%;
+          min-width: 0;
+          height: 100%;
+          min-height: 0;
+        }
+        body:not(.chat-open) .chat-panel { display: none; }
+        body:not(.chat-open) .sidebar { display: flex !important; }
+        .sidebar { flex: 1 1 auto; }
+        .topbar { padding-top: calc(12px + env(safe-area-inset-top, 0px)); }
+        .contacts { overscroll-behavior: contain; }
+        .messages { overscroll-behavior: contain; }
+        body.chat-open .chat-header {
+          padding-left: 78px;
+        }
+        body.chat-open .mobile-back {
+          top: calc(env(safe-area-inset-top, 0px) + 10px);
+          left: 10px;
+          border: 0;
+          background: transparent;
+          box-shadow: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="auth-screen" class="auth-shell">
+      <div class="brand"><i class="fa-solid fa-comments"></i> CHIMIC CONNECT</div>
+      <p class="subtitle">Private messaging for your conversations</p>
+
+      <form id="login-form" class="form-stack">
+        <input id="login-identifier" class="field" type="text" placeholder="Username or email" required />
+        <input id="login-password" class="field" type="password" placeholder="Password" required />
+        <button class="primary-btn" type="submit">Login</button>
+        <button id="face-login-btn" class="secondary-btn" type="button">Camera Preview (not identity verification)</button>
+        <button id="forgot-password-btn" class="secondary-btn" type="button">Forgot Password?</button>
+        <button id="help-center-btn" class="secondary-btn" type="button">Help Center</button>
+      </form>
+
+      <form id="register-form" class="form-stack hidden">
+        <input id="reg-fullname" class="field" type="text" placeholder="Full name" required />
+        <input id="reg-username" class="field" type="text" placeholder="Username" required />
+        <input id="reg-email" class="field" type="email" placeholder="Email" required />
+        <input id="reg-password" class="field" type="password" placeholder="Password" required />
+        <button class="primary-btn" type="submit">Create Account</button>
+      </form>
+
+      <div class="switch">
+        <span id="toggle-auth">Create account</span>
+      </div>
+    </div>
+
+    <button id="mobile-back-btn" class="mobile-back mobile-back-button hidden" type="button" aria-label="Go back to chats">
+      <span aria-hidden="true">←</span>
+      <span>Back</span>
+    </button>
+
+    <div id="app-screen" class="app-shell hidden">
+      <aside class="sidebar">
+        <div class="topbar">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <img id="current-user-avatar" class="avatar" src="" alt="current-user" />
+            <div>
+              <strong id="topbar-name">User</strong>
+              <div style="font-size:0.72rem; color: var(--text-muted);">Online</div>
+            </div>
+          </div>
+          <div class="toolbar">
+            <i id="profile-btn" class="fa-solid fa-user" title="Profile"></i>
+            <i id="notification-btn" class="fa-solid fa-bell" title="Notifications"></i>
+            <i id="settings-nav-btn" class="fa-solid fa-gear" title="Settings"></i>
+            <i id="toggle-theme" class="fa-solid fa-sun" title="Toggle theme"></i>
+            <i id="toggle-status" class="fa-solid fa-circle-notch" title="View status"></i>
+            <i id="logout-btn" class="fa-solid fa-right-from-bracket" title="Logout"></i>
+          </div>
+        </div>
+
+        <div class="search-box">
+          <i class="fa-solid fa-magnifying-glass" style="color: var(--text-muted);"></i>
+          <input id="search-input" type="text" placeholder="Search contacts" />
+        </div>
+
+        <div class="quick-actions">
+          <button id="ai-assist-btn" class="shortcut-btn" type="button">CHIMIC AI</button>
+          <button id="create-room-btn" class="shortcut-btn" type="button">Chimic Live Rooms</button>
+          <button id="new-chat-btn" class="shortcut-btn" type="button">New</button>
+          <button id="create-group-btn" class="shortcut-btn" type="button">Group</button>
+          <button id="create-story-btn" class="shortcut-btn" type="button">Story</button>
+          <button id="settings-btn" class="shortcut-btn" type="button">Set</button>
+        </div>
+
+        <div class="filter-row" aria-label="conversation filters">
+          <button class="filter-btn active" data-filter="all" type="button">All</button>
+          <button class="filter-btn" data-filter="unread" type="button">Unread</button>
+          <button class="filter-btn" data-filter="favorites" type="button">Favs</button>
+          <button class="filter-btn" data-filter="groups" type="button">Groups</button>
+        </div>
+
+        <div class="mini-panel">
+          <h4>Today</h4>
+          <div class="stat-row"><span>Open chats</span><strong id="chat-count">0</strong></div>
+          <div class="stat-row"><span>Notifications</span><strong id="notification-count">0</strong></div>
+          <div class="stat-row"><span>Smart rooms</span><strong id="room-count">0</strong></div>
+          <div class="stat-row"><span>Groups</span><strong id="group-count">0</strong></div>
+          <div class="stat-row"><span>Stories</span><strong id="story-count">0</strong></div>
+        </div>
+
+        <div id="contacts" class="contacts"></div>
+      </aside>
+
+      <main class="chat-panel">
+        <header class="chat-header">
+          <div class="chat-user">
+            <img id="chat-avatar" class="avatar" src="" alt="chat-avatar" />
+            <div>
+              <h3 id="chat-name">Select chat</h3>
+              <small id="chat-subtitle">Online</small>
+            </div>
+          </div>
+          <div class="chat-actions">
+            <i id="voice-call-btn" class="fa-solid fa-phone"></i>
+            <i id="video-call-btn" class="fa-solid fa-video"></i>
+            <button class="media-action fa-solid fa-paperclip attach-btn" type="button" title="Attach file" aria-label="Attach file"></button>
+            <input id="file-input" type="file" class="hidden" />
+          </div>
+        </header>
+
+        <div id="messages" class="messages"></div>
+
+        <div class="composer-shell">
+          <div id="reply-preview" class="reply-preview hidden">
+            <span>Replying to the selected message</span>
+            <button class="mini-action" id="clear-reply-btn" type="button" aria-label="Clear reply">✕</button>
+          </div>
+          <div id="upload-preview" class="upload-preview hidden">
+            <span id="upload-preview-label">No file selected</span>
+            <button class="mini-action" id="clear-upload-btn" type="button" aria-label="Clear upload">✕</button>
+          </div>
+          <div class="composer">
+            <i class="compose-icon fa-regular fa-face-smile" id="emoji-btn" title="Add emoji"></i>
+            <i class="compose-icon fa-regular fa-star" id="sticker-btn" title="Add sticker"></i>
+            <input id="message-input" type="text" placeholder="Type a message" aria-label="Message input" />
+            <button class="compose-icon fa-solid fa-paperclip attach-btn" type="button" title="Attach file" aria-label="Attach file"></button>
+            <button class="compose-icon fa-solid fa-microphone" id="voice-btn" type="button" title="Record voice note" aria-label="Record voice note"></button>
+            <button id="send-btn" class="send-btn" type="button" title="Send message"><i class="fa-solid fa-paper-plane"></i></button>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <aside id="status-panel" class="status-panel hidden">
+      <div class="status-header">
+        <i id="close-status-panel" class="fa-solid fa-arrow-left" style="cursor:pointer;"></i>
+        <strong>Status</strong>
+      </div>
+      <div class="status-body">
+        <div id="my-status-item" style="display:flex; flex-direction:column; gap:10px; margin-bottom:12px;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <img id="status-avatar" class="avatar" src="" alt="status-avatar" />
+            <div>
+              <strong>My Status</strong>
+              <p>Tap to create an update</p>
+            </div>
+          </div>
+        </div>
+        <div id="status-feed"></div>
+      </div>
+    </aside>
+
+    <div id="face-modal" class="modal hidden">
+      <div class="modal-card">
+        <h3 style="margin:0; color: var(--accent); text-align:center;">Camera Preview</h3>
+        <div class="video-wrap">
+          <video id="face-video" autoplay playsinline muted></video>
+        </div>
+        <div class="modal-actions">
+          <button id="accept-face" class="primary-btn" type="button">Close Preview</button>
+          <button id="cancel-face" class="secondary-btn" type="button">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="call-modal" class="modal hidden">
+      <div class="modal-card">
+        <h3 id="call-title" style="margin:0; color: var(--accent); text-align:center;">Calling...</h3>
+        <div class="video-wrap">
+          <video id="call-video" autoplay playsinline muted></video>
+        </div>
+        <button id="end-call-btn" class="danger-btn" type="button">End Call</button>
+      </div>
+    </div>
+
+    <div id="profile-modal" class="modal hidden">
+      <div class="modal-card">
+        <h3 style="margin:0; color: var(--accent); text-align:center;">Profile Settings</h3>
+        <div style="display:grid; gap:12px; margin-top:16px;">
+          <input id="profile-fullname" class="field" type="text" placeholder="Full name" />
+          <input id="profile-username" class="field" type="text" placeholder="Username" />
+          <input id="profile-email" class="field" type="email" placeholder="Email" />
+          <input id="profile-status" class="field" type="text" placeholder="Status" />
+          <input id="profile-avatar" class="field" type="url" placeholder="Avatar URL" />
+        </div>
+        <div class="modal-actions" style="margin-top:18px;">
+          <button id="save-profile-btn" class="primary-btn" type="button">Save Profile</button>
+          <button id="cancel-profile-btn" class="secondary-btn" type="button">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="settings-modal" class="modal hidden">
+      <div class="modal-card">
+        <h3 style="margin:0; color: var(--accent); text-align:center;">App Settings</h3>
+        <div style="display:grid; gap:12px; margin-top:16px;">
+          <label style="display:grid; gap:6px;">
+            <span style="color: var(--text-muted); font-size: 0.8rem;">Theme</span>
+            <select id="settings-theme" class="field">
+              <option value="dark">Dark</option>
+              <option value="light">Light</option>
+              <option value="midnight">Midnight</option>
+            </select>
+          </label>
+          <label style="display:grid; gap:6px;">
+            <span style="color: var(--text-muted); font-size: 0.8rem;">Language</span>
+            <select id="settings-language" class="field">
+              <option value="en">English</option>
+              <option value="es">Spanish</option>
+              <option value="fr">French</option>
+            </select>
+          </label>
+          <label style="display:grid; gap:6px;">
+            <span style="color: var(--text-muted); font-size: 0.8rem;">Chat wallpaper</span>
+            <input id="settings-wallpaper" class="field" type="url" placeholder="https://example.com/wallpaper.jpg" />
+          </label>
+          <label style="display:grid; gap:6px;">
+            <span style="color: var(--text-muted); font-size: 0.8rem;">Accent color</span>
+            <input id="settings-accent" class="field" type="color" value="#3478F6" />
+          </label>
+          <label style="display:flex; align-items:center; justify-content:space-between; gap:8px; color: var(--text-primary);">
+            <span>AI assistant consent</span>
+            <input id="settings-ai-consent" type="checkbox" />
+          </label>
+          <label style="display:flex; align-items:center; justify-content:space-between; gap:8px; color: var(--text-primary);">
+            <span>Notifications</span>
+            <input id="settings-notifications" type="checkbox" checked />
+          </label>
+          <label style="display:flex; align-items:center; justify-content:space-between; gap:8px; color: var(--text-primary);">
+            <span>Live translation</span>
+            <input id="settings-live-translation" type="checkbox" />
+          </label>
+          <label style="display:flex; align-items:center; justify-content:space-between; gap:8px; color: var(--text-primary);">
+            <span>Voice assistant</span>
+            <input id="settings-voice-assistant" type="checkbox" />
+          </label>
+        </div>
+        <div class="modal-actions" style="margin-top:18px;">
+          <button id="save-settings-btn" class="primary-btn" type="button">Save Settings</button>
+          <button id="cancel-settings-btn" class="secondary-btn" type="button">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="help-center-modal" class="modal hidden">
+      <div class="modal-card">
+        <h3 style="margin:0; color: var(--accent); text-align:center;">Help Centre</h3>
+        <div class="help-list">
+          <div class="help-item">
+            <strong>Mobile back</strong>
+            <span>Tap the Back button at the top of an open chat to return to your conversation list.</span>
+          </div>
+          <div class="help-item">
+            <strong>Reset password</strong>
+            <span>Password reset is not connected yet. Contact the site administrator for help.</span>
+          </div>
+          <div class="help-item">
+            <strong>AI assistant</strong>
+            <span>Open CHIMIC AI from the main dashboard to get help with replies, ideas, and quick answers.</span>
+          </div>
+          <div class="help-item">
+            <strong>Privacy</strong>
+            <span>Only authorized users can access protected chats and media. Private uploads are protected by session checks.</span>
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top:18px;">
+          <button id="close-help-center" class="primary-btn" type="button">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="quick-modal" class="modal hidden">
+      <div class="modal-card">
+        <h3 id="quick-modal-title" style="margin:0; color: var(--accent); text-align:center;">Quick action</h3>
+        <input id="quick-modal-input" class="field" type="text" style="margin-top:18px;" placeholder="Type here" />
+        <div class="modal-actions" style="margin-top:18px;">
+          <button id="quick-modal-confirm" class="primary-btn" type="button">Continue</button>
+          <button id="quick-modal-cancel" class="secondary-btn" type="button">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="recording-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="recording-title">
+      <div class="modal-card">
+        <h3 id="recording-title" style="margin:0; text-align:center;">Voice message</h3>
+        <div class="recording-status"><span class="recording-dot"></span><strong id="recording-state">Requesting microphone</strong><time id="recording-time">00:00</time></div>
+        <audio id="recording-preview" class="recording-preview hidden" controls preload="metadata"></audio>
+        <p id="recording-error" class="hidden" role="alert"></p>
+        <div id="recording-progress" class="media-progress" aria-live="polite"></div>
+        <div class="recording-controls">
+          <button id="record-stop-btn" class="secondary-btn" type="button"><i class="fa-solid fa-stop"></i> Stop</button>
+          <button id="record-cancel-btn" class="danger-btn" type="button"><i class="fa-solid fa-xmark"></i> Cancel</button>
+          <button id="record-send-btn" class="primary-btn" type="button" disabled><i class="fa-solid fa-paper-plane"></i> Send</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="status-editor-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="status-editor-title">
+      <div class="modal-card status-editor">
+        <h3 id="status-editor-title" style="margin:0;">Create status</h3>
+        <textarea id="status-caption" class="field" rows="3" placeholder="Write a status or caption"></textarea>
+        <input id="status-link" class="field" type="url" placeholder="Add a link (optional)" />
+        <div id="status-link-preview" class="hidden" style="margin-top:8px;padding:10px;border:1px solid rgba(255,255,255,.12);border-radius:9px;overflow-wrap:anywhere;"></div>
+        <label for="status-privacy" style="display:block;margin-top:12px;">Who can view this?</label>
+        <select id="status-privacy" class="field">
+          <option value="contacts">My contacts</option>
+          <option value="contacts_except">My contacts except selected people</option>
+          <option value="selected">Only selected people</option>
+          <option value="public">Public</option>
+        </select>
+        <select id="status-people" class="field hidden" multiple size="4" aria-label="Choose people for status privacy"></select>
+        <div class="status-tools">
+          <button id="status-photo-btn" class="status-tool" type="button"><i class="fa-regular fa-image"></i> Photo</button>
+          <button id="status-video-btn" class="status-tool" type="button"><i class="fa-solid fa-video"></i> Video</button>
+          <button id="status-gif-btn" class="status-tool" type="button"><i class="fa-solid fa-film"></i> GIF</button>
+          <button id="status-audio-btn" class="status-tool" type="button"><i class="fa-solid fa-music"></i> Audio</button>
+          <button id="status-camera-photo-btn" class="status-tool" type="button"><i class="fa-solid fa-camera"></i> Capture photo</button>
+          <button id="status-camera-video-btn" class="status-tool" type="button"><i class="fa-solid fa-video"></i> Record video</button>
+          <button id="status-voice-btn" class="status-tool" type="button"><i class="fa-solid fa-microphone"></i> Record voice</button>
+          <button id="status-emoji-btn" class="status-tool" type="button">😊 Emoji</button>
+          <button id="status-sticker-btn" class="status-tool" type="button"><i class="fa-regular fa-star"></i> Sticker</button>
+        </div>
+        <input id="status-photo-input" class="hidden" type="file" accept="image/*" multiple />
+        <input id="status-video-input" class="hidden" type="file" accept="video/*" multiple />
+        <input id="status-gif-input" class="hidden" type="file" accept="image/gif,.gif" multiple />
+        <input id="status-audio-input" class="hidden" type="file" accept="audio/*" multiple />
+        <input id="status-camera-photo-input" class="hidden" type="file" accept="image/*" capture="environment" />
+        <input id="status-camera-video-input" class="hidden" type="file" accept="video/*" capture="environment" />
+        <div id="status-file-preview" class="status-preview"></div>
+        <div id="status-publish-progress" class="media-progress" aria-live="polite"></div>
+        <div class="modal-actions" style="margin-top:14px;">
+          <button id="status-publish-btn" class="primary-btn" type="button">Publish</button>
+          <button id="status-cancel-btn" class="secondary-btn" type="button">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="status-viewer-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="status-viewer-owner">
+      <div class="modal-card status-viewer">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <img id="status-viewer-avatar" class="avatar" alt="" />
+          <div style="flex:1;min-width:0;"><strong id="status-viewer-owner"></strong><small id="status-viewer-time" style="display:block;color:var(--text-muted);"></small></div>
+          <button id="status-viewer-close" class="media-action" type="button" aria-label="Close status">✕</button>
+        </div>
+        <div id="status-viewer-content"></div>
+        <div id="status-viewer-caption"></div>
+        <div class="status-viewer-actions">
+          <button id="status-prev-btn" class="secondary-btn" type="button">Previous</button>
+          <button id="status-reaction-btn" class="secondary-btn" type="button">❤️ React</button>
+          <button id="status-reply-btn" class="primary-btn" type="button">Reply</button>
+          <button id="status-next-btn" class="secondary-btn" type="button">Next</button>
+        </div>
+        <button id="status-delete-btn" class="danger-btn hidden" type="button" style="margin-top:8px;">Delete status</button>
+        <button id="status-viewers-btn" class="secondary-btn hidden" type="button" style="margin-top:8px;">View viewers</button>
+      </div>
+    </div>
+
+    <nav class="mobile-bottom-nav" aria-label="Mobile navigation">
+      <div class="nav-row">
+        <button class="mobile-nav-btn active" data-view="chats" type="button"><i class="fa-solid fa-message"></i><span>Chats</span></button>
+        <button class="mobile-nav-btn" data-view="calls" type="button"><i class="fa-solid fa-phone"></i><span>Calls</span></button>
+        <button class="mobile-nav-btn" data-view="stories" type="button"><i class="fa-regular fa-image"></i><span>Stories</span></button>
+        <button class="mobile-nav-btn" data-view="communities" type="button"><i class="fa-solid fa-users"></i><span>Communities</span></button>
+        <button class="mobile-nav-btn" data-view="settings" type="button"><i class="fa-solid fa-gear"></i><span>Settings</span></button>
+      </div>
+    </nav>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/src/chatbot.js"></script>
+    <script>
+      const state = {
+        currentUser: null,
+        users: [],
+        activeUser: null,
+        quickAction: null,
+        socket: io(),
+        currentFilter: 'all',
+        favorites: new Set(),
+        pinned: new Set(),
+        archived: new Set(),
+        unread: {},
+        recentChats: {},
+        replyTo: null,
+        pendingAttachment: null,
+        sessionToken: localStorage.getItem('chimik-session') || '',
+        mediaUrls: [],
+        statusMediaUrls: [],
+        statusFiles: [],
+        currentStatuses: [],
+        currentStatusIndex: 0,
+        recorder: null,
+        recordingStream: null,
+        recordingChunks: [],
+        recordingBlob: null,
+        recordingUrl: '',
+        recordingStartedAt: 0,
+        recordingTimer: null,
+        recordingCancelled: false,
+        recordingPurpose: 'message',
+      };
+
+      const authScreen = document.getElementById('auth-screen');
+      const appScreen = document.getElementById('app-screen');
+      const loginForm = document.getElementById('login-form');
+      const registerForm = document.getElementById('register-form');
+      const toggleAuth = document.getElementById('toggle-auth');
+      const contactsEl = document.getElementById('contacts');
+      const messagesEl = document.getElementById('messages');
+      const searchInput = document.getElementById('search-input');
+      const statusFeed = document.getElementById('status-feed');
+
+      function showToast(message) {
+        alert(message);
+      }
+
+      function openQuickModal(title, placeholder, callback) {
+        const modal = document.getElementById('quick-modal');
+        const titleEl = document.getElementById('quick-modal-title');
+        const inputEl = document.getElementById('quick-modal-input');
+
+        state.quickAction = callback;
+        titleEl.textContent = title;
+        inputEl.placeholder = placeholder;
+        inputEl.value = '';
+        modal.classList.remove('hidden');
+        inputEl.focus();
+      }
+
+      function openHelpCenter() {
+        document.getElementById('help-center-modal').classList.remove('hidden');
+      }
+
+      async function requestJson(url, options = {}) {
+        const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+        if (state.sessionToken) headers.Authorization = `Bearer ${state.sessionToken}`;
+        const response = await fetch(url, {
+          ...options,
+          headers,
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.message || 'Request failed');
+        }
+        return data;
+      }
+
+      function escapeHtml(value) {
+        return String(value || '').replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]);
+      }
+
+      function isChimicAiContact(user) {
+        if (!user || typeof user !== 'object') return false;
+
+        const id = String(user.id ?? '').trim();
+        const username = String(user.username || user.email || '').trim().toLowerCase();
+        const fullName = String(user.fullName || '').trim().toLowerCase();
+
+        return (
+          id === 'chimic-ai' ||
+          id === '-1' ||
+          username === 'chimic-ai' ||
+          username === 'chimic' ||
+          fullName.includes('chimic ai') ||
+          fullName.includes('chimic')
+        );
+      }
+
+      function getChimicAiContact() {
+        return {
+          id: 'chimic-ai',
+          fullName: 'Chimic AI',
+          username: 'chimic-ai',
+          email: 'ai@chimic.local',
+          avatar: 'https://ui-avatars.com/api/?name=Chimic+AI&background=00a884&color=fff',
+          status: 'AI assistant',
+          isOnline: true,
+        };
+      }
+
+      function releaseMediaUrls() {
+        state.mediaUrls.forEach((url) => URL.revokeObjectURL(url));
+        state.mediaUrls = [];
+      }
+
+      function fetchMediaBlob(mediaId, inline = false) {
+        return new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.open('GET', `/api/media/${encodeURIComponent(mediaId)}${inline ? '?inline=1' : ''}`);
+          xhr.responseType = 'blob';
+          xhr.setRequestHeader('Authorization', `Bearer ${state.sessionToken}`);
+          xhr.onload = () => {
+            if (xhr.status >= 200 && xhr.status < 300) resolve(xhr.response);
+            else {
+              xhr.response.text().then((text) => {
+                try { reject(new Error(JSON.parse(text).message || 'Attachment could not be loaded.')); }
+                catch { reject(new Error('Attachment could not be loaded.')); }
+              });
+            }
+          };
+          xhr.onerror = () => reject(new Error('Network error while loading attachment.'));
+          xhr.onabort = () => reject(new Error('Attachment loading was cancelled.'));
+          xhr.send();
+        });
+      }
+
+      async function loadMediaPreview(mediaId, target, urlCollection = state.mediaUrls) {
+        try {
+          const blob = await fetchMediaBlob(mediaId, true);
+          if (!target.isConnected) return;
+          const url = URL.createObjectURL(blob);
+          urlCollection.push(url);
+          if (target.tagName === 'AUDIO') {
+            const audioStatus = target.parentElement?.querySelector('[data-audio-status]');
+            const updateAudioStatus = () => {
+              if (audioStatus && Number.isFinite(target.duration)) audioStatus.textContent = `${formatDuration(target.currentTime)} / ${formatDuration(target.duration)}`;
+            };
+            target.addEventListener('loadedmetadata', () => {
+              if (audioStatus) audioStatus.textContent = 'Ready';
+              updateAudioStatus();
+            }, { once: true });
+            target.addEventListener('timeupdate', updateAudioStatus);
+            target.addEventListener('error', () => {
+              if (audioStatus) audioStatus.textContent = 'This audio file could not be played.';
+            }, { once: true });
+          }
+          target.src = url;
+          if (target.tagName === 'AUDIO' || target.tagName === 'VIDEO') target.load();
+        } catch (error) {
+          if (target.isConnected) target.replaceWith(Object.assign(document.createElement('span'), { className: 'media-progress', textContent: error.message }));
+        }
+      }
+
+      function downloadMedia(mediaId, button) {
+        const card = button.closest('[data-media-card]');
+        const progress = card?.querySelector('.media-progress');
+        const fallbackName = card?.dataset.filename || 'attachment';
+        const isAppleMobile = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        const openWindow = isAppleMobile ? window.open('about:blank', '_blank') : null;
+        if (progress) progress.textContent = 'Preparing download…';
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', `/api/media/${encodeURIComponent(mediaId)}`);
+        xhr.responseType = 'blob';
+        xhr.setRequestHeader('Authorization', `Bearer ${state.sessionToken}`);
+        xhr.onprogress = (event) => {
+          if (progress && event.lengthComputable) progress.textContent = `Downloading ${Math.round(event.loaded / event.total * 100)}%`;
+          else if (progress) progress.textContent = 'Downloading…';
+        };
+        xhr.onload = () => {
+          if (xhr.status < 200 || xhr.status >= 300) {
+            xhr.response.text().then((text) => {
+              let message = 'Download failed. Please try again.';
+              try { message = JSON.parse(text).message || message; } catch {}
+              if (progress) progress.textContent = message;
+              if (openWindow && !openWindow.closed) openWindow.close();
+              showToast(message);
+            });
+            return;
+          }
+          const disposition = xhr.getResponseHeader('Content-Disposition') || '';
+          const encodedName = disposition.match(/filename\*=UTF-8''([^;]+)/i)?.[1];
+          const plainName = disposition.match(/filename="?([^";]+)"?/i)?.[1];
+          let filename = fallbackName;
+          try { filename = encodedName ? decodeURIComponent(encodedName) : (plainName || fallbackName); } catch { filename = plainName || fallbackName; }
+          const blob = new Blob([xhr.response], { type: xhr.getResponseHeader('Content-Type') || 'application/octet-stream' });
+          const url = URL.createObjectURL(blob);
+          if (openWindow && !openWindow.closed) {
+            openWindow.location.href = url;
+            showToast('File opened. Use the browser share or save action to keep it on this device.');
+          } else {
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            link.rel = 'noopener';
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+          }
+          window.setTimeout(() => URL.revokeObjectURL(url), 60000);
+          if (progress) progress.textContent = openWindow ? `Opened ${filename}` : `Downloaded ${filename}`;
+        };
+        xhr.onerror = () => {
+          const message = 'Network error while downloading. Check your connection and retry.';
+          if (progress) progress.textContent = message;
+          if (openWindow && !openWindow.closed) openWindow.close();
+          showToast(message);
+        };
+        xhr.onabort = () => {
+          if (progress) progress.textContent = 'Download cancelled.';
+          if (openWindow && !openWindow.closed) openWindow.close();
+        };
+        xhr.send();
+      }
+
+      function uploadMedia(file, purpose, recipientId, onProgress = () => {}) {
+        return new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.open('POST', '/api/media');
+          xhr.setRequestHeader('Authorization', `Bearer ${state.sessionToken}`);
+          xhr.setRequestHeader('Content-Type', 'application/octet-stream');
+          xhr.setRequestHeader('X-File-Name', encodeURIComponent(file.name || 'voice-note'));
+          xhr.setRequestHeader('X-File-Content-Type', file.type || 'application/octet-stream');
+          xhr.setRequestHeader('X-Media-Purpose', purpose);
+          if (recipientId) xhr.setRequestHeader('X-Recipient-Id', String(recipientId));
+          xhr.upload.onprogress = (event) => onProgress(event.lengthComputable ? Math.round(event.loaded / event.total * 100) : null);
+          xhr.onload = () => {
+            let result;
+            try { result = JSON.parse(xhr.responseText); }
+            catch { reject(new Error('The server returned an invalid upload response.')); return; }
+            if (xhr.status >= 200 && xhr.status < 300) resolve(result.media);
+            else reject(new Error(result.message || 'Upload failed.'));
+          };
+          xhr.onerror = () => reject(new Error('Network error while uploading. Check your connection and retry.'));
+          xhr.onabort = () => reject(new Error('Upload was cancelled.'));
+          xhr.send(file);
+        });
+      }
+
+async function loadUsers() {
+  try {
+    const users = await requestJson('/api/users');
+
+    if (!Array.isArray(users)) {
+      throw new Error('Invalid contacts response from server.');
+    }
+
+    // Preserve the virtual Chimic AI contact.
+    const aiContact =
+      (state.users || []).find(isChimicAiContact) ||
+      getChimicAiContact();
+
+    // Replace normal contacts with the latest server contacts.
+    state.users = users.filter((user) =>
+      user &&
+      !isChimicAiContact(user) &&
+      String(user.id) !== String(state.currentUser?.id)
+    );
+
+    // Add Chimic AI back to the contacts list.
+    state.users.unshift(aiContact);
+
+    await loadConversationPreviewData();
+
+    renderContacts();
+
+    await updateMiniStats();
+
+  } catch (error) {
+    console.error('Load users error:', error);
+    showToast(error.message || 'Unable to load contacts.');
+  }
+}
+
+
+     
+async function loadConversationPreviewData() {
+  if (!state.currentUser) return;
+
+  state.recentChats = state.recentChats || {};
+  state.unread = state.unread || {};
+
+  // Refresh normal conversation previews.
+  for (const user of state.users || []) {
+    if (!user) continue;
+
+    if (Number(user.id) === Number(state.currentUser.id)) {
+      continue;
+    }
+
+    // Chimic AI history is stored separately in this browser.
+    if (isChimicAiContact(user)) {
+      try {
+        const storageKey =
+          `chimic-ai-chat-${Number(state.currentUser.id)}`;
+
+        const history = JSON.parse(
+          localStorage.getItem(storageKey) || '[]'
+        );
+
+        if (Array.isArray(history) && history.length) {
+          const last = history[history.length - 1];
+
+          state.recentChats[user.id] = {
+            id: history.length,
+            createdAt: last.createdAt || new Date().toISOString()
+          };
+
+          state.unread['chimic-ai'] =
+            String(last.content || '').slice(0, 32);
+        } else {
+          delete state.recentChats[user.id];
+          state.unread['chimic-ai'] = '';
+        }
+      } catch (error) {
+        console.error('Chimic AI preview error:', error);
+      }
+
+      continue;
+    }
+
+    try {
+      const data = await requestJson(
+        `/api/messages?userA=${encodeURIComponent(state.currentUser.id)}&userB=${encodeURIComponent(user.id)}`
+      );
+
+      if (!Array.isArray(data) || !data.length) {
+        delete state.recentChats[user.id];
+        continue;
+      }
+
+      const last = data[data.length - 1];
+
+      const previewText =
+        last.type === 'image'
+          ? 'Image'
+          : String(last.content || '').slice(0, 32);
+
+      const key =
+        `${Math.min(Number(state.currentUser.id), Number(user.id))}-${Math.max(Number(state.currentUser.id), Number(user.id))}`;
+
+      state.unread[key] = previewText;
+
+      state.recentChats[user.id] = {
+        id: Number(last.id),
+        createdAt: last.createdAt
+      };
+
+    } catch (error) {
+      // Keep the contact list usable if a preview cannot load.
+      console.warn(
+        'Could not load conversation preview:',
+        user.username,
+        error
+      );
+    }
+  }
+}
+
+
+async function updateMiniStats() {
+  const notificationCount = document.getElementById('notification-count');
+  const chatCount = document.getElementById('chat-count');
+  const roomCount = document.getElementById('room-count');
+  const groupCount = document.getElementById('group-count');
+  const storyCount = document.getElementById('story-count');
+
+  if (state.currentUser) {
+    try {
+      const notifications = await requestJson(
+        `/api/notifications?userId=${state.currentUser.id}`
+      );
+      if (notificationCount) notificationCount.textContent = notifications.length;
+    } catch (error) {
+      if (notificationCount) notificationCount.textContent = '0';
+    }
+
+    try {
+      const rooms = await requestJson(
+        `/api/rooms?userId=${state.currentUser.id}`
+      );
+      if (roomCount) roomCount.textContent = rooms.length;
+    } catch (error) {
+      if (roomCount) roomCount.textContent = '0';
+    }
+
+    try {
+      const groups = await requestJson(
+        `/api/groups?userId=${state.currentUser.id}`
+      );
+      if (groupCount) groupCount.textContent = groups.length;
+    } catch (error) {
+      if (groupCount) groupCount.textContent = '0';
+    }
+
+    try {
+      const statuses = await requestJson('/api/statuses');
+      if (storyCount) storyCount.textContent = statuses.length;
+    } catch (error) {
+      if (storyCount) storyCount.textContent = '0';
+    }
+  }
+
+  if (chatCount) {
+    chatCount.textContent = Object.keys(state.recentChats || {}).length;
+  }
+}
+
+
+function getContactPreview(user) {
+  if (!state.currentUser || !user) {
+    return 'No recent messages yet';
+  }
+
+  // Get the latest Chimic AI message.
+  if (isChimicAiContact(user)) {
+    let history = [];
+
+    try {
+      const storageKey =
+        `chimic-ai-chat-${Number(state.currentUser.id)}`;
+
+      const savedHistory = localStorage.getItem(storageKey);
+
+      history = savedHistory ? JSON.parse(savedHistory) : [];
+
+      if (!Array.isArray(history)) {
+        history = [];
+      }
+    } catch (error) {
+      console.error('Could not read Chimic AI history:', error);
+      history = [];
+    }
+
+    if (!history.length) {
+      return 'Ask Chimic AI anything';
+    }
+
+    const lastMessage = history[history.length - 1];
+
+    const preview = String(lastMessage.content || '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 32);
+
+    return preview || 'Chimic AI conversation';
+  }
+
+  // Get the latest normal private message.
+  const currentId = Number(state.currentUser.id);
+  const userId = Number(user.id);
+
+  const previewKey =
+    `${Math.min(currentId, userId)}-${Math.max(currentId, userId)}`;
+
+  return (
+    state.unread?.[previewKey] ||
+    'No recent messages yet'
+  );
+}
+
+
+function applyFilters(list) {
+  const value = String(searchInput?.value || '').trim().toLowerCase();
+
+  const users = Array.isArray(list) ? list : [];
+
+  return users.filter((user) => {
+    if (!user || !state.currentUser) return false;
+
+    if (String(user.id) === String(state.currentUser.id)) {
+      return false;
+    }
+
+    const isAI = isChimicAiContact(user);
+
+    const identity = [
+      user.fullName || '',
+      user.username || '',
+      user.email || ''
+    ].join(' ').toLowerCase();
+
+    const matchesSearch = !value || identity.includes(value);
+
+    const currentId = Number(state.currentUser.id);
+    const userId = Number(user.id);
+
+    const previewKey = isAI
+      ? 'chimic-ai'
+      : `${Math.min(currentId, userId)}-${Math.max(currentId, userId)}`;
+
+    const unreadPreview = String(
+      state.unread?.[previewKey] || ''
+    ).trim();
+
+    const favorites = state.favorites;
+    const isFavorite = favorites instanceof Set
+      ? favorites.has(user.id) || favorites.has(String(user.id)) ||
+        favorites.has(Number(user.id))
+      : Array.isArray(favorites)
+        ? favorites.some(id => String(id) === String(user.id))
+        : false;
+
+    const matchesFilter =
+      state.currentFilter === 'all' ||
+      (state.currentFilter === 'unread' && unreadPreview.length > 0) ||
+      (state.currentFilter === 'favorites' && isFavorite) ||
+      (state.currentFilter === 'groups' &&
+        String(user.username || '').toLowerCase().includes('group'));
+
+    return matchesSearch && matchesFilter;
+  });
+}
+
+
+function getContactById(id) {
+  const requestedId = String(id);
+
+  if (requestedId === '-1' || requestedId === 'chimic-ai') {
+    if (!Array.isArray(state.users)) {
+      state.users = [];
+    }
+
+    let aiContact = state.users.find(isChimicAiContact);
+
+    if (!aiContact) {
+      aiContact = getChimicAiContact();
+      state.users.push(aiContact);
+    }
+
+    return aiContact;
+  }
+
+  return (state.users || []).find(
+    (user) => String(user.id) === requestedId
+  ) || null;
+}
+
+
+
+function renderContacts() {
+  if (!contactsEl) return;
+
+  const hasSearch = Boolean(searchInput?.value?.trim());
+
+  state.pinned = state.pinned instanceof Set
+    ? state.pinned
+    : new Set(state.pinned || []);
+
+  state.archived = state.archived instanceof Set
+    ? state.archived
+    : new Set(state.archived || []);
+
+  const aiContact = getChimicAiContact();
+
+  // Ensure the virtual AI contact exists in the contacts array.
+  if (!Array.isArray(state.users)) state.users = [];
+
+  if (!state.users.some(isChimicAiContact)) {
+    state.users.unshift(aiContact);
+  }
+
+  const chatUsers = state.users.filter((user) => {
+    if (!user || !state.currentUser) return false;
+
+    if (String(user.id) === String(state.currentUser.id)) {
+      return false;
+    }
+
+    // Hide archived conversations from the normal chat list.
+    const isArchived = state.archived.has(user.id) ||
+      state.archived.has(String(user.id));
+
+    if (isArchived && !hasSearch) return false;
+
+    return (
+      isChimicAiContact(user) ||
+      hasSearch ||
+      Boolean(state.recentChats?.[user.id])
+    );
+  });
+
+  let filtered = applyFilters(chatUsers);
+
+  filtered.sort((first, second) => {
+    if (isChimicAiContact(first)) return -1;
+    if (isChimicAiContact(second)) return 1;
+
+    const firstPinned =
+      state.pinned.has(first.id) ||
+      state.pinned.has(String(first.id));
+
+    const secondPinned =
+      state.pinned.has(second.id) ||
+      state.pinned.has(String(second.id));
+
+    if (firstPinned !== secondPinned) {
+      return Number(secondPinned) - Number(firstPinned);
+    }
+
+    const firstTime = new Date(
+      state.recentChats?.[first.id]?.createdAt || 0
+    ).getTime();
+
+    const secondTime = new Date(
+      state.recentChats?.[second.id]?.createdAt || 0
+    ).getTime();
+
+    return secondTime - firstTime;
+  });
+
+  if (!filtered.length) {
+    contactsEl.innerHTML = `
+      <div style="padding:22px 18px;color:var(--text-muted);text-align:center;line-height:1.5;">
+        <i class="fa-solid fa-inbox"
+           style="font-size:1.5rem;margin-bottom:8px;display:block;"></i>
+        No conversations found<br />
+        <small>Search for a registered user or open Chimic AI.</small>
+      </div>
+    `;
+    return;
+  }
+
+  contactsEl.innerHTML = filtered.map((user) => {
+    const isAI = isChimicAiContact(user);
+
+    const active =
+      state.activeUser &&
+      String(state.activeUser.id) === String(user.id)
+        ? 'active'
+        : '';
+
+    const preview = getContactPreview(user);
+
+    const pinned =
+      state.pinned.has(user.id) ||
+      state.pinned.has(String(user.id));
+
+    const archived =
+      state.archived.has(user.id) ||
+      state.archived.has(String(user.id));
+
+    const online = isAI || user.isOnline === true;
+
+    const userName = escapeHtml(
+      user.fullName || user.username || 'User'
+    );
+
+    const username = escapeHtml(user.username || 'user');
+
+    const safePreview = escapeHtml(
+      String(preview || '')
+    );
+
+    const safeStatus = escapeHtml(
+      isAI
+        ? 'Your AI assistant'
+        : (user.status || (online ? 'Online now' : 'Offline'))
+    );
+
+    const avatar = escapeHtml(
+      user.avatar ||
+      (
+        'https://ui-avatars.com/api/?name=' +
+        encodeURIComponent(user.fullName || user.username || 'User')
+      )
+    );
+
+    const contactTime = escapeHtml(
+      state.recentChats?.[user.id]?.createdAt
+        ? String(state.recentChats[user.id].createdAt).slice(11, 16)
+        : ''
+    );
+
+    return `
+      <div
+        class="contact-item ${active} ${isAI ? 'ai-contact' : ''}"
+        data-user-id="${escapeHtml(String(user.id))}"
+        role="button"
+        tabindex="0"
+      >
+        <div style="position:relative;">
+          <img
+            class="avatar"
+            src="${avatar}"
+            alt="${username}"
+            loading="lazy"
+          />
+
+          <span
+            class="online-dot"
+            style="position:absolute;right:0;bottom:0;${online ? '' : 'background:#b5c0d6;box-shadow:none;'}"
+          ></span>
+        </div>
+
+        <div class="contact-meta">
+          <div class="contact-name-row">
+            <h4 class="contact-name">${userName}</h4>
+            <span class="contact-time">${contactTime}</span>
+          </div>
+
+          <div class="contact-preview">
+            <span>${safePreview}</span>
+          </div>
+
+          <p class="contact-status">
+            ${isAI ? 'AI assistant' : (online ? 'Online' : 'Offline')}
+            · ${safeStatus}
+          </p>
+        </div>
+
+        <div class="contact-actions">
+          <button
+            class="mini-action"
+            data-pin="${escapeHtml(String(user.id))}"
+            title="${pinned ? 'Unpin conversation' : 'Pin conversation'}"
+            type="button"
+          >${pinned ? '📌' : '📍'}</button>
+
+          <button
+            class="mini-action"
+            data-archive="${escapeHtml(String(user.id))}"
+            title="${archived ? 'Unarchive conversation' : 'Archive conversation'}"
+            type="button"
+          >${archived ? '📂' : '🗂️'}</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // Open selected conversations.
+  contactsEl.querySelectorAll('.contact-item').forEach((item) => {
+    const openConversation = async () => {
+      const user = getContactById(item.dataset.userId);
+
+      if (!user) {
+        showToast('Contact could not be opened. Please refresh and try again.');
+        return;
+      }
+
+      await selectUser(user);
+    };
+
+    item.addEventListener('click', async (event) => {
+      if (event.target.closest('.mini-action')) return;
+      await openConversation();
+    });
+
+    item.addEventListener('keydown', async (event) => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      if (event.target.closest('.mini-action')) return;
+
+      event.preventDefault();
+      await openConversation();
+    });
+  });
+
+  // Pin and archive conversations.
+  contactsEl.querySelectorAll('.mini-action').forEach((button) => {
+    button.addEventListener('click', (event) => {
+      event.stopPropagation();
+
+      const userId = button.dataset.pin || button.dataset.archive;
+      const user = getContactById(userId);
+
+      if (!user) return;
+
+      const collection = button.dataset.pin
+        ? state.pinned
+        : state.archived;
+
+      const existingKey = [...collection].find(
+        id => String(id) === String(user.id)
+      );
+
+      if (existingKey !== undefined) {
+        collection.delete(existingKey);
+      } else {
+        collection.add(user.id);
+      }
+
+      renderContacts();
+    });
+  });
+}
+
+
+// Mobile conversation navigation and back button.
+function setMobileConversationView(show) {
+  const sidebar = document.querySelector('.sidebar');
+  const back = document.getElementById('mobile-back-btn');
+  const shouldShowMobile = window.innerWidth <= 820;
+
+  document.body.classList.toggle(
+    'chat-open',
+    Boolean(show) && shouldShowMobile
+  );
+
+  if (!sidebar) return;
+
+  if (shouldShowMobile) {
+    sidebar.style.display = show ? 'none' : 'flex';
+
+    if (back) {
+      back.classList.toggle('hidden', !show);
+      back.style.display = show ? 'inline-flex' : 'none';
+      back.setAttribute('aria-hidden', String(!show));
+    }
+  } else {
+    sidebar.style.display = 'flex';
+
+    if (back) {
+      back.classList.add('hidden');
+      back.style.display = 'none';
+      back.setAttribute('aria-hidden', 'true');
+    }
+  }
+}
+
+      function closeChat() {
+        document.body.classList.remove('chat-open');
+        state.activeUser = null;
+        document.getElementById('chat-name').textContent = 'Select chat';
+        document.getElementById('chat-subtitle').textContent = 'Choose a conversation';
+        document.getElementById('chat-avatar').removeAttribute('src');
+        releaseMediaUrls();
+        messagesEl.innerHTML = '<div class="welcome-state"><div class="welcome-card"><h3>Welcome to Chimic Connect</h3><p>Select a conversation to start messaging.</p></div></div>';
+        setMobileConversationView(false);
+        renderContacts();
+      }
+
+     
+async function selectUser(user) {
+  if (!user) {
+    showToast('Unable to open this conversation.');
+    return;
+  }
+
+  state.activeUser = user;
+
+  const isAI = isChimicAiContact(user);
+
+  const chatName = document.getElementById('chat-name');
+  const chatSubtitle = document.getElementById('chat-subtitle');
+  const chatAvatar = document.getElementById('chat-avatar');
+
+  const displayName = isAI
+    ? 'Chimic AI'
+    : (user.fullName || user.username || 'User');
+
+  if (chatName) {
+    chatName.textContent = displayName;
+  }
+
+  if (chatSubtitle) {
+    chatSubtitle.textContent = isAI
+      ? 'Your AI assistant'
+      : (user.status || (user.isOnline ? 'Online' : 'Offline'));
+  }
+
+  if (chatAvatar) {
+    chatAvatar.src = isAI
+      ? getChimicAiContact().avatar
+      : (
+          user.avatar ||
+          'https://ui-avatars.com/api/?name=' +
+          encodeURIComponent(displayName)
+        );
+
+    chatAvatar.onerror = () => {
+      chatAvatar.src =
+        'https://ui-avatars.com/api/?name=' +
+        encodeURIComponent(displayName);
+    };
+  }
+
+  renderContacts();
+
+  setMobileConversationView(true);
+
+  await loadMessages();
+}
+
+
+// Render the saved Chimic AI conversation.
+function renderChimicAiConversation() {
+  if (!messagesEl || !state.currentUser) return;
+
+  const storageKey =
+    `chimic-ai-chat-${Number(state.currentUser.id)}`;
+
+  let messages = [];
+
+  try {
+    const savedMessages = localStorage.getItem(storageKey);
+    const parsedMessages = savedMessages
+      ? JSON.parse(savedMessages)
+      : [];
+
+    messages = Array.isArray(parsedMessages)
+      ? parsedMessages
+      : [];
+  } catch (error) {
+    console.error('Could not load Chimic AI conversation:', error);
+    messages = [];
+  }
+
+  if (!messages.length) {
+    messagesEl.innerHTML = `
+      <div class="empty-chat">
+        <div style="text-align:center;padding:25px;color:var(--text-muted);">
+          <i class="fa-solid fa-robot"
+             style="font-size:2rem;margin-bottom:12px;"></i>
+          <h3>Welcome to Chimic AI</h3>
+          <p>Ask a question and start a conversation.</p>
+        </div>
+      </div>
+    `;
+
+    return;
+  }
+
+  messagesEl.innerHTML = messages.map((message) => {
+    const outgoing = message.role === 'user';
+    const content = escapeHtml(
+      String(message.content || '')
+    ).replace(/\n/g, '<br>');
+
+    return `
+      <div class="bubble ${outgoing ? 'outgoing' : 'incoming'}">
+        ${content}
+      </div>
+    `;
+  }).join('');
+
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+async function loadMessages() {
+  if (!state.currentUser || !state.activeUser) {
+    releaseMediaUrls();
+
+    if (messagesEl) {
+      messagesEl.innerHTML = '';
+    }
+
+    return;
+  }
+
+  // Chimic AI has its own locally stored conversation.
+  if (isChimicAiContact(state.activeUser)) {
+    releaseMediaUrls();
+    renderChimicAiConversation();
+    return;
+  }
+
+  try {
+    const data = await requestJson(
+      `/api/messages?userA=${encodeURIComponent(state.currentUser.id)}&userB=${encodeURIComponent(state.activeUser.id)}`
+    );
+
+    if (!Array.isArray(data)) {
+      throw new Error('Invalid message response.');
+    }
+
+    const previewKey =
+      `${Math.min(Number(state.currentUser.id), Number(state.activeUser.id))}-${Math.max(Number(state.currentUser.id), Number(state.activeUser.id))}`;
+
+    if (data.length) {
+      const last = data[data.length - 1];
+
+      const previewText =
+        last.type === 'image'
+          ? 'Image'
+          : String(last.content || '').slice(0, 30);
+
+      state.unread[previewKey] = previewText;
+
+      state.recentChats[state.activeUser.id] = {
+        id: Number(last.id),
+        createdAt: last.createdAt
+      };
+    } else {
+      state.unread[previewKey] = '';
+      delete state.recentChats[state.activeUser.id];
+    }
+
+    releaseMediaUrls();
+
+    if (!data.length) {
+      const displayName =
+        state.activeUser.fullName ||
+        state.activeUser.username ||
+        'User';
+
+      const avatar =
+        state.activeUser.avatar ||
+        'https://ui-avatars.com/api/?name=' +
+        encodeURIComponent(displayName);
+
+      messagesEl.innerHTML = `
+        <div class="welcome-state">
+          <div class="welcome-card">
+            <img
+              src="${escapeHtml(avatar)}"
+              alt="${escapeHtml(displayName)}"
+            />
+            <h3>${escapeHtml(displayName)}</h3>
+            <p>@${escapeHtml(state.activeUser.username || '')}</p>
+            <p>Private conversation</p>
+            <button
+              class="primary-btn"
+              type="button"
+              id="start-conversation-btn"
+            >
+              Start Conversation
+            </button>
+          </div>
+        </div>
+      `;
+
+      document
+        .getElementById('start-conversation-btn')
+        ?.addEventListener('click', () => {
+          document.getElementById('message-input')?.focus();
+        });
+
+      renderContacts();
+      return;
+    }
+
+    messagesEl.innerHTML = data.map((message) => {
+      const incoming =
+        Number(message.senderId) !== Number(state.currentUser.id);
+
+      const bubbleClass = incoming ? 'incoming' : 'outgoing';
+
+      let displayText = escapeHtml(
+        String(message.content || '')
+      ).replace(/\n/g, '<br>');
+
+      if (message.mediaId) {
+        const mediaId = Number(message.mediaId);
+        const filename = escapeHtml(
+          message.originalName || 'Attachment'
+        );
+
+        const mimeType = String(
+          message.mimeType || 'application/octet-stream'
+        );
+
+        let preview = `
+          <div class="attachment-preview"
+               style="display:grid;place-items:center;">
+            File attachment
+          </div>
+        `;
+
+        if (/^image\/(jpeg|png|gif|webp|avif)$/i.test(mimeType)) {
+          preview = `
+            <img
+              class="attachment-preview"
+              data-media-preview="${mediaId}"
+              alt="${filename}"
+            />
+          `;
+        } else if (/^video\/(mp4|webm|quicktime)$/i.test(mimeType)) {
+          preview = `
+            <video
+              class="attachment-preview"
+              data-media-preview="${mediaId}"
+              controls
+              playsinline
+              preload="metadata"
+            ></video>
+          `;
+        } else if (/^audio\/(webm|mp4|ogg|mpeg|wav|aac)$/i.test(mimeType)) {
+          preview = `
+            <div>
+              <span class="media-progress" data-audio-status>
+                Loading audio…
+              </span>
+              <audio
+                class="attachment-audio"
+                data-media-preview="${mediaId}"
+                controls
+                preload="metadata"
+              ></audio>
+            </div>
+          `;
+        }
+
+        displayText = `
+          <div
+            class="attachment-card"
+            data-media-card
+            data-filename="${filename}"
+          >
+            <div class="attachment-top">
+              <strong class="attachment-name" title="${filename}">
+                ${filename}
+              </strong>
+
+              <button
+                class="media-action"
+                type="button"
+                data-download-media="${mediaId}"
+                aria-label="Download ${filename}"
+              >
+                <i class="fa-solid fa-download"></i>
+              </button>
+            </div>
+
+            ${preview}
+
+            <div class="attachment-bottom">
+              <span>${escapeHtml(mimeType)}</span>
+              <button
+                class="media-action"
+                type="button"
+                data-download-media="${mediaId}"
+              >
+                Download
+              </button>
+            </div>
+
+            <div class="media-progress" aria-live="polite"></div>
+          </div>
+        `;
+      } else if (
+        message.type === 'image' &&
+        /^data:image\//i.test(String(message.content || ''))
+      ) {
+        displayText = `
+          <img
+            src="${escapeHtml(message.content)}"
+            class="attachment-preview"
+            alt="Shared image"
+          />
+        `;
+      }
+
+      const messageTime = message.createdAt
+        ? new Date(message.createdAt).toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit'
+          })
+        : '';
+
+      return `
+        <div class="bubble ${bubbleClass}">
+          ${displayText}
+          <small>${escapeHtml(messageTime)}</small>
+        </div>
+      `;
+    }).join('');
+
+    messagesEl
+      .querySelectorAll('[data-media-preview]')
+      .forEach((preview) => {
+        loadMediaPreview(
+          preview.dataset.mediaPreview,
+          preview
+        );
+      });
+
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+
+    renderContacts();
+  } catch (error) {
+    console.error('Load messages error:', error);
+
+    messagesEl.innerHTML = `
+      <div class="welcome-state">
+        <div class="welcome-card">
+          <h3>Unable to load conversation</h3>
+          <p>${escapeHtml(error.message || 'Please refresh and try again.')}</p>
+        </div>
+      </div>
+    `;
+  }
+}
+
+
+async function loginUser(user, sessionToken = state.sessionToken) {
+  if (!sessionToken) {
+    showToast('Please log in again to restore your secure session.');
+
+    localStorage.removeItem('chimik-user');
+    return;
+  }
+
+  state.currentUser = user;
+  state.sessionToken = sessionToken;
+
+  localStorage.setItem('chimik-session', sessionToken);
+  localStorage.setItem('chimik-user', JSON.stringify(user));
+
+  const avatarUrl =
+    user.avatar ||
+    'https://ui-avatars.com/api/?name=' +
+    encodeURIComponent(user.fullName || user.username || 'User');
+
+  const currentAvatar =
+    document.getElementById('current-user-avatar');
+
+  const statusAvatar =
+    document.getElementById('status-avatar');
+
+  const topbarName =
+    document.getElementById('topbar-name');
+
+  if (currentAvatar) currentAvatar.src = avatarUrl;
+  if (statusAvatar) statusAvatar.src = avatarUrl;
+
+  if (topbarName) {
+    topbarName.textContent = user.fullName || user.username;
+  }
+
+  authScreen.classList.add('hidden');
+  appScreen.classList.remove('hidden');
+
+  state.socket?.emit('presence:join', user.id);
+
+  await loadUsers();
+
+  // Make sure the virtual Chimic AI contact exists.
+  if (!state.users.some(isChimicAiContact)) {
+    state.users.unshift(getChimicAiContact());
+  }
+
+  renderContacts();
+  setMobileConversationView(false);
+
+  await loadStatuses();
+  await updateMiniStats();
+}
+
+
+function logout() {
+  const token = state.sessionToken;
+
+  if (token) {
+    fetch('/api/logout', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }).catch(() => {});
+  }
+
+  releaseMediaUrls();
+
+  state.currentUser = null;
+  state.activeUser = null;
+  state.sessionToken = '';
+
+  localStorage.removeItem('chimik-user');
+  localStorage.removeItem('chimik-session');
+
+  if (messagesEl) messagesEl.innerHTML = '';
+
+  appScreen.classList.add('hidden');
+  authScreen.classList.remove('hidden');
+
+  setMobileConversationView(false);
+}
+
+
+function openProfileModal() {
+  if (!state.currentUser) return;
+
+  document.getElementById('profile-fullname').value =
+    state.currentUser.fullName || '';
+
+  document.getElementById('profile-username').value =
+    state.currentUser.username || '';
+
+  document.getElementById('profile-email').value =
+    state.currentUser.email || '';
+
+  document.getElementById('profile-status').value =
+    state.currentUser.status || '';
+
+  document.getElementById('profile-avatar').value =
+    state.currentUser.avatar || '';
+
+  document.getElementById('profile-modal').classList.remove('hidden');
+}
+
+
+function saveProfile() {
+  if (!state.currentUser) return;
+
+  const fullName =
+    document.getElementById('profile-fullname').value.trim();
+
+  const username =
+    document.getElementById('profile-username').value.trim();
+
+  const email =
+    document.getElementById('profile-email').value.trim();
+
+  const status =
+    document.getElementById('profile-status').value.trim();
+
+  const avatar =
+    document.getElementById('profile-avatar').value.trim();
+
+  state.currentUser = {
+    ...state.currentUser,
+    fullName: fullName || state.currentUser.fullName,
+    username: username || state.currentUser.username,
+    email: email || state.currentUser.email,
+    status: status || state.currentUser.status,
+    avatar: avatar || state.currentUser.avatar
+  };
+
+  syncCurrentUser();
+
+  document.getElementById('profile-modal').classList.add('hidden');
+
+  renderContacts();
+
+  if (
+    state.activeUser &&
+    Number(state.activeUser.id) === Number(state.currentUser.id)
+  ) {
+    document.getElementById('chat-name').textContent =
+      state.currentUser.fullName || state.currentUser.username;
+  }
+
+  showToast('Profile updated successfully.');
+}
+
+
+async function submitLogin(event) {
+  event.preventDefault();
+
+  const identifier =
+    document.getElementById('login-identifier').value.trim();
+
+  const password =
+    document.getElementById('login-password').value.trim();
+
+  try {
+    const response = await requestJson('/api/login', {
+      method: 'POST',
+      body: JSON.stringify({ identifier, password })
+    });
+
+    await loginUser(response.user, response.sessionToken);
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+
+async function submitRegister(event) {
+  event.preventDefault();
+
+  const fullName =
+    document.getElementById('reg-fullname').value.trim();
+
+  const username =
+    document.getElementById('reg-username').value.trim();
+
+  const email =
+    document.getElementById('reg-email').value.trim();
+
+  const password =
+    document.getElementById('reg-password').value.trim();
+
+  try {
+    await requestJson('/api/register', {
+      method: 'POST',
+      body: JSON.stringify({
+        fullName,
+        username,
+        email,
+        password
+      })
+    });
+
+    toggleAuth.click();
+
+    showToast('Account created. Please log in.');
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+
+function updateUploadPreview(label) {
+  const preview = document.getElementById('upload-preview');
+  const uploadLabel =
+    document.getElementById('upload-preview-label');
+
+  if (!preview || !uploadLabel) return;
+
+  uploadLabel.textContent = label;
+  preview.classList.toggle('hidden', !label);
+}
+
+
+function clearReplyPreview() {
+  state.replyTo = null;
+
+  const preview = document.getElementById('reply-preview');
+
+  if (preview) {
+    preview.classList.add('hidden');
+  }
+}
+
+
+// Send a message to the Chimic AI API.
+// requestJson already returns parsed JSON.
+async function sendMessageToChimicAI(message, history = []) {
+  const response = await requestJson('/api/ai', {
+    method: 'POST',
+    body: JSON.stringify({
+      message,
+      history
+    })
+  });
+
+  if (!response || !response.success) {
+    throw new Error(
+      response?.error || 'Chimic AI connection failed.'
+    );
+  }
+
+  return response.reply || response.answer || '';
+}
+
+
+let sendingMessage = false;
+
+
+async function sendMessage() {
+  const input = document.getElementById('message-input');
+  const sendButton = document.getElementById('send-btn');
+
+  if (!input || !state.currentUser || !state.activeUser) return;
+
+  const content = input.value.trim();
+
+  if (!content || sendingMessage) return;
+
+  sendingMessage = true;
+
+  if (sendButton) {
+    sendButton.disabled = true;
+    sendButton.setAttribute('aria-busy', 'true');
+  }
+
+  try {
+    // Chimic AI uses its own conversation history.
+    if (isChimicAiContact(state.activeUser)) {
+      const storageKey =
+        `chimic-ai-chat-${Number(state.currentUser.id)}`;
+
+      let history = [];
+
+      try {
+        const saved = JSON.parse(
+          localStorage.getItem(storageKey) || '[]'
+        );
+
+        history = Array.isArray(saved) ? saved : [];
+      } catch {
+        history = [];
+      }
+
+      const apiHistory = history.slice(-10).map((message) => ({
+        role: message.role === 'assistant' ? 'assistant' : 'user',
+        content: String(message.content || '')
+      }));
+
+      history.push({
+        role: 'user',
+        content,
+        createdAt: new Date().toISOString()
+      });
+
+      localStorage.setItem(storageKey, JSON.stringify(history));
+
+      input.value = '';
+      clearReplyPreview();
+
+      renderChimicAiConversation();
+
+      try {
+        const reply = await sendMessageToChimicAI(
+          content,
+          apiHistory
+        );
+
+        history.push({
+          role: 'assistant',
+          content: String(reply),
+          createdAt: new Date().toISOString()
+        });
+
+        localStorage.setItem(
+          storageKey,
+          JSON.stringify(history)
+        );
+
+        renderChimicAiConversation();
+      } catch (error) {
+        showToast(error.message || 'Chimic AI could not reply.');
+      }
+
+      return;
+    }
+
+    // Normal private message.
+    const payload = {
+      senderId: Number(state.currentUser.id),
+      recipientId: Number(state.activeUser.id),
+      content,
+      type: 'text'
+    };
+
+    await requestJson('/api/messages', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+
+    input.value = '';
+    clearReplyPreview();
+
+    await loadMessages();
+  } catch (error) {
+    showToast(
+      error.message || 'Message could not be sent. Please try again.'
+    );
+  } finally {
+    sendingMessage = false;
+
+    if (sendButton) {
+      sendButton.disabled = false;
+      sendButton.removeAttribute('aria-busy');
+    }
+
+    input.focus();
+  }
+}
+
+
+// Open Chimic AI directly from its button.
+async function triggerAiAssist() {
+  if (!state.currentUser) {
+    showToast('Please log in first.');
+    return;
+  }
+
+  let aiContact = state.users.find(isChimicAiContact);
+
+  if (!aiContact) {
+    aiContact = getChimicAiContact();
+    state.users.unshift(aiContact);
+  }
+
+  await selectUser(aiContact);
+
+  document.getElementById('message-input')?.focus();
+}
+
+  
+      async function createSmartRoom() {
+        if (!state.currentUser) return;
+        openQuickModal('Create a live room', 'Chimic studio', async (roomName) => {
+          if (!roomName) return;
+
+          try {
+            const response = await requestJson('/api/rooms', {
+              method: 'POST',
+              body: JSON.stringify({
+                ownerId: state.currentUser.id,
+                name: roomName,
+                description: 'Created from the assistant dashboard',
+                isPrivate: false,
+              }),
+            });
+            await updateMiniStats();
+            showToast(`Live room created: ${response.room.name}`);
+          } catch (error) {
+            showToast(error.message);
+          }
+        });
+      }
+
+      async function createGroupFromDashboard() {
+        if (!state.currentUser) return;
+        openQuickModal('Create a group', 'Innovation circle', async (groupName) => {
+          if (!groupName) return;
+
+          try {
+            const response = await requestJson('/api/groups', {
+              method: 'POST',
+              body: JSON.stringify({
+                ownerId: state.currentUser.id,
+                name: groupName,
+                description: 'Community space created from the dashboard',
+                isPrivate: false,
+              }),
+            });
+            await updateMiniStats();
+            showToast(`Group created: ${response.group.name}`);
+          } catch (error) {
+            showToast(error.message);
+          }
+        });
+      }
+
+      function createStoryFromDashboard() {
+        createStatus();
+      }
+
+      function populateSettingsForm(settings = {}) {
+        const themeSelect = document.getElementById('settings-theme');
+        const languageSelect = document.getElementById('settings-language');
+        const wallpaperInput = document.getElementById('settings-wallpaper');
+        const accentInput = document.getElementById('settings-accent');
+        const aiConsent = document.getElementById('settings-ai-consent');
+        const notifications = document.getElementById('settings-notifications');
+        const liveTranslation = document.getElementById('settings-live-translation');
+        const voiceAssistant = document.getElementById('settings-voice-assistant');
+
+        if (themeSelect) themeSelect.value = settings.theme || localStorage.getItem('chimik-theme') || 'dark';
+        if (languageSelect) languageSelect.value = settings.language || 'en';
+        if (wallpaperInput) wallpaperInput.value = settings.wallpaper || '';
+        if (accentInput) accentInput.value = settings.accent || '#3478F6';
+        if (aiConsent) aiConsent.checked = Boolean(settings.aiConsent ?? false);
+        if (notifications) notifications.checked = Boolean(settings.notificationsEnabled ?? true);
+        if (liveTranslation) liveTranslation.checked = Boolean(settings.liveTranslation ?? false);
+        if (voiceAssistant) voiceAssistant.checked = Boolean(settings.voiceAssistant ?? false);
+      }
+
+      async function loadUserSettings() {
+        if (!state.currentUser) return null;
+        try {
+          const settings = await requestJson(`/api/settings/${state.currentUser.id}`);
+          populateSettingsForm(settings);
+          return settings;
+        } catch (error) {
+          const fallback = {
+            theme: localStorage.getItem('chimik-theme') || 'dark',
+            language: 'en',
+            aiConsent: false,
+            notificationsEnabled: true,
+            liveTranslation: false,
+            voiceAssistant: false,
+            wallpaper: '',
+            accent: '#3478F6',
+          };
+          populateSettingsForm(fallback);
+          return fallback;
+        }
+      }
+
+      async function saveUserSettings() {
+        if (!state.currentUser) return;
+
+        const settings = {
+          theme: document.getElementById('settings-theme').value || 'dark',
+          language: document.getElementById('settings-language').value || 'en',
+          wallpaper: document.getElementById('settings-wallpaper').value.trim(),
+          accent: document.getElementById('settings-accent').value || '#3478F6',
+          aiConsent: document.getElementById('settings-ai-consent').checked,
+          notificationsEnabled: document.getElementById('settings-notifications').checked,
+          liveTranslation: document.getElementById('settings-live-translation').checked,
+          voiceAssistant: document.getElementById('settings-voice-assistant').checked,
+        };
+
+        try {
+          await requestJson(`/api/settings/${state.currentUser.id}`, {
+            method: 'POST',
+            body: JSON.stringify(settings),
+          });
+          applyTheme(settings.theme === 'light' ? 'light' : settings.theme === 'midnight' ? 'dark' : 'dark');
+          document.getElementById('settings-modal').classList.add('hidden');
+          showToast('Settings saved successfully.');
+        } catch (error) {
+          showToast(error.message || 'Unable to save settings.');
+        }
+      }
+
+      async function openSettingsPanel() {
+        if (!state.currentUser) return;
+        await loadUserSettings();
+        document.getElementById('settings-modal').classList.remove('hidden');
+      }
+
+      async function handleAttach() {
+        if (!state.currentUser || !state.activeUser) {
+          showToast('Open a conversation before attaching a file.');
+          return;
+        }
+        const fileInput = document.getElementById('file-input');
+        fileInput.click();
+      }
+
+      document.getElementById('file-input').addEventListener('change', async (event) => {
+        const file = event.target.files[0];
+        event.target.value = '';
+        if (!file || !state.currentUser || !state.activeUser) return;
+        if (file.size > 100 * 1024 * 1024) {
+          showToast('Files must be 100 MB or smaller.');
+          return;
+        }
+        updateUploadPreview(`Uploading ${file.name} (0%)`);
+        try {
+          const media = await uploadMedia(file, 'message', state.activeUser.id, (percent) => {
+            updateUploadPreview(`Uploading ${file.name}${percent === null ? '…' : ` (${percent}%)`}`);
+          });
+          const type = file.type.startsWith('image/') ? 'image' : file.type.startsWith('video/') ? 'video' : file.type.startsWith('audio/') ? 'audio' : 'file';
+          await requestJson('/api/messages', {
+            method: 'POST',
+            body: JSON.stringify({ senderId: state.currentUser.id, recipientId: state.activeUser.id, content: file.name, type, mediaId: media.id }),
+          });
+          await loadMessages();
+          updateUploadPreview('');
+        } catch (error) {
+          updateUploadPreview('');
+          showToast(error.message || 'The attachment could not be sent.');
+        }
+      });
+
+      document.querySelectorAll('.attach-btn').forEach((button) => button.addEventListener('click', handleAttach));
+
+      messagesEl.addEventListener('click', (event) => {
+        const downloadButton = event.target.closest('[data-download-media]');
+        if (downloadButton) downloadMedia(downloadButton.dataset.downloadMedia, downloadButton);
+      });
+
+      function formatDuration(seconds) {
+        const minutes = Math.floor(seconds / 60).toString().padStart(2, '0');
+        const remainder = Math.floor(seconds % 60).toString().padStart(2, '0');
+        return `${minutes}:${remainder}`;
+      }
+
+      function releaseRecordingResources() {
+        if (state.recordingTimer) window.clearInterval(state.recordingTimer);
+        state.recordingTimer = null;
+        state.recordingStream?.getTracks().forEach((track) => track.stop());
+        state.recordingStream = null;
+      }
+
+      function clearRecordingPreview() {
+        const preview = document.getElementById('recording-preview');
+        preview.pause();
+        preview.removeAttribute('src');
+        preview.load();
+        if (state.recordingUrl) URL.revokeObjectURL(state.recordingUrl);
+        state.recordingUrl = '';
+        state.recordingBlob = null;
+        state.recordingChunks = [];
+      }
+
+      function recordingError(message) {
+        const error = document.getElementById('recording-error');
+        error.textContent = message;
+        error.classList.remove('hidden');
+        document.getElementById('recording-state').textContent = 'Recording unavailable';
+      }
+
+      async function startVoiceRecording(purpose = 'message') {
+        if (purpose === 'message' && (!state.currentUser || !state.activeUser)) {
+          showToast('Open a conversation before recording a voice message.');
+          return;
+        }
+        const modal = document.getElementById('recording-modal');
+        const preview = document.getElementById('recording-preview');
+        const error = document.getElementById('recording-error');
+        const sendButton = document.getElementById('record-send-btn');
+        clearRecordingPreview();
+        error.textContent = '';
+        error.classList.add('hidden');
+        preview.classList.add('hidden');
+        document.getElementById('recording-progress').textContent = '';
+        document.getElementById('recording-state').textContent = 'Requesting microphone';
+        document.getElementById('recording-time').textContent = '00:00';
+        document.getElementById('record-stop-btn').disabled = false;
+        sendButton.disabled = true;
+        state.recordingPurpose = purpose;
+        state.recordingCancelled = false;
+        modal.classList.remove('hidden');
+
+        if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
+          recordingError('Voice recording is not supported by this browser. Try a current version of Safari, Chrome, or Edge.');
+          document.getElementById('record-stop-btn').disabled = true;
+          return;
+        }
+
+        try {
+          state.recordingStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          const candidates = ['audio/mp4;codecs=mp4a.40.2', 'audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus', 'audio/mp4'];
+          const mimeType = candidates.find((candidate) => MediaRecorder.isTypeSupported?.(candidate));
+          state.recorder = mimeType ? new MediaRecorder(state.recordingStream, { mimeType }) : new MediaRecorder(state.recordingStream);
+          state.recordingChunks = [];
+          state.recordingStartedAt = Date.now();
+          state.recorder.ondataavailable = (event) => {
+            if (event.data?.size) state.recordingChunks.push(event.data);
+          };
+          state.recorder.onerror = () => {
+            releaseRecordingResources();
+            recordingError('Recording was interrupted. You can try again.');
+          };
+          state.recorder.onstop = () => {
+            releaseRecordingResources();
+            if (state.recordingCancelled) return;
+            const type = state.recorder?.mimeType || state.recordingChunks[0]?.type || 'application/octet-stream';
+            state.recordingBlob = new Blob(state.recordingChunks, { type });
+            if (!state.recordingBlob.size) {
+              recordingError('No audio was captured. Check microphone permission and try again.');
+              return;
+            }
+            state.recordingUrl = URL.createObjectURL(state.recordingBlob);
+            preview.src = state.recordingUrl;
+            preview.classList.remove('hidden');
+            preview.load();
+            document.getElementById('recording-state').textContent = 'Preview your recording';
+            document.getElementById('record-stop-btn').disabled = true;
+            sendButton.disabled = false;
+          };
+          state.recorder.start(250);
+          document.getElementById('recording-state').textContent = 'Recording';
+          state.recordingTimer = window.setInterval(() => {
+            document.getElementById('recording-time').textContent = formatDuration((Date.now() - state.recordingStartedAt) / 1000);
+          }, 250);
+        } catch (error) {
+          releaseRecordingResources();
+          const message = error.name === 'NotAllowedError' || error.name === 'SecurityError'
+            ? 'Microphone permission was denied. Allow microphone access in browser settings and try again.'
+            : error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError'
+              ? 'No microphone is available on this device.'
+              : error.name === 'NotReadableError'
+                ? 'The microphone is busy or unavailable.'
+                : 'Unable to start microphone recording. Check browser permissions and try again.';
+          recordingError(message);
+          document.getElementById('record-stop-btn').disabled = true;
+        }
+      }
+
+      function stopVoiceRecording() {
+        if (state.recorder?.state === 'recording') {
+          document.getElementById('recording-state').textContent = 'Finishing recording';
+          state.recorder.stop();
+        }
+      }
+
+      function cancelVoiceRecording() {
+        state.recordingCancelled = true;
+        if (state.recorder?.state === 'recording') state.recorder.stop();
+        releaseRecordingResources();
+        clearRecordingPreview();
+        document.getElementById('recording-modal').classList.add('hidden');
+        document.getElementById('recording-state').textContent = 'Recording cancelled';
+      }
+
+      async function sendRecordedVoice() {
+        if (!state.recordingBlob || !state.recordingBlob.size) {
+          recordingError('The recording is empty. Record a voice note before sending.');
+          return;
+        }
+        const extension = state.recordingBlob.type.includes('mp4') ? 'm4a' : state.recordingBlob.type.includes('ogg') ? 'ogg' : 'webm';
+        const file = new File([state.recordingBlob], `voice-note-${Date.now()}.${extension}`, { type: state.recordingBlob.type });
+        const sendButton = document.getElementById('record-send-btn');
+        const progress = document.getElementById('recording-progress');
+        sendButton.disabled = true;
+        try {
+          const recipientId = state.recordingPurpose === 'message' ? state.activeUser?.id : null;
+          if (state.recordingPurpose === 'status') {
+            state.statusFiles.push({ file, type: 'audio' });
+            renderStatusFilePreview();
+            document.getElementById('status-editor-modal').classList.remove('hidden');
+          } else {
+            const media = await uploadMedia(file, 'message', recipientId, (percent) => {
+              progress.textContent = percent === null ? 'Uploading voice recording…' : `Uploading ${percent}%`;
+            });
+            await requestJson('/api/messages', {
+              method: 'POST',
+              body: JSON.stringify({ senderId: state.currentUser.id, recipientId, content: file.name, type: 'voice', mediaId: media.id }),
+            });
+            await loadMessages();
+          }
+          releaseRecordingResources();
+          clearRecordingPreview();
+          document.getElementById('recording-modal').classList.add('hidden');
+        } catch (error) {
+          sendButton.disabled = false;
+          progress.textContent = error.message || 'Voice upload failed. Retry when your connection is available.';
+          showToast(progress.textContent);
+        }
+      }
+
+      async function loadStatuses() {
+        const statuses = await requestJson('/api/statuses');
+        state.currentStatuses = statuses;
+        statusFeed.innerHTML = statuses.map((item, index) => {
+          const own = Number(item.userId) === Number(state.currentUser?.id);
+          const summary = item.caption || item.content || (item.mediaItems?.length ? `${item.mediaItems.length} media item${item.mediaItems.length > 1 ? 's' : ''}` : item.linkUrl);
+          return `<button class="status-item" type="button" data-status-index="${index}" style="width:100%;text-align:left;color:inherit;background:transparent;border:0;cursor:pointer;">
+            <img class="avatar" src="${escapeHtml(item.avatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(item.fullName || item.username))}" alt="${escapeHtml(item.username)}" />
+            <span style="min-width:0;"><strong>${escapeHtml(item.fullName || item.username)}${own ? ' · You' : ''}</strong>
+              <span style="display:block;color:var(--text-muted);font-size:.8rem;overflow-wrap:anywhere;">${escapeHtml(summary || item.type || 'Status update')}</span>
+              <small>${new Date(item.createdAt).toLocaleString()}</small>
+            </span>
+          </button>`;
+        }).join('') || '<p style="color:var(--text-muted);">No active statuses yet.</p>';
+      }
+
+      function clearStatusEditor() {
+        state.statusPreviewUrls?.forEach((url) => URL.revokeObjectURL(url));
+        state.statusPreviewUrls = [];
+        state.statusFiles = [];
+        document.getElementById('status-caption').value = '';
+        document.getElementById('status-link').value = '';
+        document.getElementById('status-link-preview').textContent = '';
+        document.getElementById('status-link-preview').classList.add('hidden');
+        document.getElementById('status-privacy').value = 'contacts';
+        document.getElementById('status-people').classList.add('hidden');
+        document.getElementById('status-file-preview').innerHTML = '';
+        document.getElementById('status-publish-progress').textContent = '';
+        ['status-photo-input', 'status-video-input', 'status-gif-input', 'status-audio-input', 'status-camera-photo-input', 'status-camera-video-input'].forEach((id) => { document.getElementById(id).value = ''; });
+      }
+
+      function createStatus() {
+        if (!state.currentUser) return;
+        clearStatusEditor();
+        const people = document.getElementById('status-people');
+        people.innerHTML = state.users.filter((user) => Number(user.id) !== Number(state.currentUser.id)).map((user) => `<option value="${Number(user.id)}">${escapeHtml(user.fullName || user.username)} (@${escapeHtml(user.username)})</option>`).join('');
+        document.getElementById('status-editor-modal').classList.remove('hidden');
+      }
+
+      function renderStatusFilePreview() {
+        state.statusPreviewUrls?.forEach((url) => URL.revokeObjectURL(url));
+        state.statusPreviewUrls = [];
+        const preview = document.getElementById('status-file-preview');
+        preview.innerHTML = state.statusFiles.map(({ file }) => {
+          const name = escapeHtml(file.name);
+          if (file.type.startsWith('image/')) {
+            const url = URL.createObjectURL(file);
+            state.statusPreviewUrls.push(url);
+            return `<div><img src="${url}" alt="${name}" /><small>${name}</small></div>`;
+          }
+          if (file.type.startsWith('video/')) {
+            const url = URL.createObjectURL(file);
+            state.statusPreviewUrls.push(url);
+            return `<div><video src="${url}" controls muted playsinline></video><small>${name}</small></div>`;
+          }
+          if (file.type.startsWith('audio/')) {
+            const url = URL.createObjectURL(file);
+            state.statusPreviewUrls.push(url);
+            return `<div><audio src="${url}" controls preload="metadata"></audio><small>${name}</small></div>`;
+          }
+          return `<div class="status-tool"><i class="fa-solid fa-file"></i> ${name}</div>`;
+        }).join('');
+      }
+
+      function addStatusFiles(files) {
+        const selected = [...files];
+        if (state.statusFiles.reduce((total, entry) => total + entry.file.size, 0) + selected.reduce((total, file) => total + file.size, 0) > 100 * 1024 * 1024) {
+          showToast('A status can contain up to 100 MB of media.');
+          return;
+        }
+        state.statusFiles.push(...selected.map((file) => ({ file })));
+        renderStatusFilePreview();
+      }
+
+      async function publishStatus() {
+        const caption = document.getElementById('status-caption').value.trim();
+        const linkUrl = document.getElementById('status-link').value.trim();
+        const visibility = document.getElementById('status-privacy').value;
+        const selectedIds = [...document.getElementById('status-people').selectedOptions].map((option) => Number(option.value));
+        if (visibility === 'selected' && !selectedIds.length) {
+          showToast('Choose at least one person who can view this status.');
+          return;
+        }
+        if (!caption && !linkUrl && !state.statusFiles.length) {
+          showToast('Add text, a link, or at least one media file before publishing.');
+          return;
+        }
+        const mediaIds = [];
+        const progress = document.getElementById('status-publish-progress');
+        const publishButton = document.getElementById('status-publish-btn');
+        publishButton.disabled = true;
+        try {
+          for (let index = 0; index < state.statusFiles.length; index += 1) {
+            const file = state.statusFiles[index].file;
+            const media = await uploadMedia(file, 'status', null, (percent) => {
+              progress.textContent = `Uploading ${index + 1}/${state.statusFiles.length}: ${file.name}${percent === null ? '' : ` (${percent}%)`}`;
+            });
+            mediaIds.push(media.id);
+          }
+          const types = state.statusFiles.map((entry) => entry.file.type);
+          let type = 'text';
+          if (types.length === 1) type = types[0] === 'image/gif' ? 'gif' : types[0].split('/')[0] || 'file';
+          else if (types.length > 1 && types.every((item) => item.startsWith('image/'))) type = 'multiple-photo';
+          else if (types.length > 1 && types.every((item) => item.startsWith('video/'))) type = 'multiple-video';
+          else if (types.length) type = 'mixed';
+          await requestJson('/api/statuses', {
+            method: 'POST',
+            body: JSON.stringify({ content: caption, caption, linkUrl, type, mediaIds, visibility, excludedUserIds: visibility === 'contacts_except' ? selectedIds : [], includedUserIds: visibility === 'selected' ? selectedIds : [] }),
+          });
+          document.getElementById('status-editor-modal').classList.add('hidden');
+          clearStatusEditor();
+          await loadStatuses();
+          await updateMiniStats();
+        } catch (error) {
+          progress.textContent = error.message || 'Status upload failed. Check your connection and retry.';
+          showToast(progress.textContent);
+        } finally {
+          publishButton.disabled = false;
+        }
+      }
+
+      async function openStatusViewer(index) {
+        if (index < 0 || index >= state.currentStatuses.length) return;
+        state.statusMediaUrls.forEach((url) => URL.revokeObjectURL(url));
+        state.statusMediaUrls = [];
+        state.currentStatusIndex = index;
+        const status = state.currentStatuses[index];
+        const own = Number(status.userId) === Number(state.currentUser.id);
+        document.getElementById('status-viewer-avatar').src = status.avatar || '';
+        document.getElementById('status-viewer-owner').textContent = status.fullName || status.username;
+        document.getElementById('status-viewer-time').textContent = new Date(status.createdAt).toLocaleString();
+        document.getElementById('status-viewer-caption').textContent = status.caption || status.content || '';
+        document.getElementById('status-delete-btn').classList.toggle('hidden', !own);
+        document.getElementById('status-viewers-btn').classList.toggle('hidden', !own);
+        document.getElementById('status-viewer-content').innerHTML = '';
+        if (status.linkUrl) {
+          try {
+            const parsedLink = new URL(status.linkUrl);
+            if (parsedLink.protocol === 'https:' || parsedLink.protocol === 'http:') {
+              const link = document.createElement('a');
+              link.href = parsedLink.href;
+              link.target = '_blank';
+              link.rel = 'noopener noreferrer';
+              link.textContent = parsedLink.href;
+              document.getElementById('status-viewer-content').append(link);
+            }
+          } catch {
+            // Ignore invalid status links.
+          }
+        }
+        for (const media of status.mediaItems || []) {
+          let element;
+          if (media.mimeType.startsWith('image/')) element = document.createElement('img');
+          else if (media.mimeType.startsWith('video/')) { element = document.createElement('video'); element.controls = true; element.playsInline = true; }
+          else if (media.mimeType.startsWith('audio/')) { element = document.createElement('audio'); element.controls = true; }
+          else {
+            const attachment = document.createElement('button');
+            attachment.className = 'media-action';
+            attachment.type = 'button';
+            attachment.textContent = `Download ${media.originalName}`;
+            attachment.addEventListener('click', () => downloadMedia(media.id, attachment));
+            document.getElementById('status-viewer-content').append(attachment);
+            continue;
+          }
+          element.classList.add('status-viewer-media');
+          if (element.tagName === 'IMG') element.alt = media.originalName;
+          document.getElementById('status-viewer-content').append(element);
+          loadMediaPreview(media.id, element, state.statusMediaUrls);
+        }
+        document.getElementById('status-viewer-modal').classList.remove('hidden');
+        if (!own) {
+          try { await requestJson(`/api/statuses/${status.id}/view`, { method: 'POST', body: '{}' }); }
+          catch (error) { showToast(error.message); }
+        }
+      }
+
+      
+      async function deleteCurrentStatus() {
+        const status = state.currentStatuses[state.currentStatusIndex];
+        if (!status || Number(status.userId) !== Number(state.currentUser.id)) return;
+        try {
+          await requestJson(`/api/statuses/${status.id}`, { method: 'DELETE' });
+          state.statusMediaUrls.forEach((url) => URL.revokeObjectURL(url));
+          state.statusMediaUrls = [];
+          document.getElementById('status-viewer-modal').classList.add('hidden');
+          await loadStatuses();
+          await updateMiniStats();
+        } catch (error) { showToast(error.message); }
+      }
+
+      async function reactToCurrentStatus() {
+        const status = state.currentStatuses[state.currentStatusIndex];
+        if (!status) return;
+        try {
+          await requestJson(`/api/statuses/${status.id}/reactions`, { method: 'POST', body: JSON.stringify({ reaction: '❤️' }) });
+          showToast('Reaction sent.');
+        } catch (error) { showToast(error.message); }
+      }
+
+      async function replyToCurrentStatus() {
+        const status = state.currentStatuses[state.currentStatusIndex];
+        if (!status || Number(status.userId) === Number(state.currentUser.id)) return;
+        const user = state.users.find((item) => Number(item.id) === Number(status.userId));
+        if (!user) return;
+        state.statusMediaUrls.forEach((url) => URL.revokeObjectURL(url));
+        state.statusMediaUrls = [];
+        document.getElementById('status-viewer-modal').classList.add('hidden');
+        await selectUser(user);
+        document.getElementById('message-input').value = `Reply to status: ${status.caption || status.content || ''} `;
+        document.getElementById('message-input').focus();
+      }
+
+      async function showStatusViewers() {
+        const status = state.currentStatuses[state.currentStatusIndex];
+        if (!status) return;
+        try {
+          const viewers = await requestJson(`/api/statuses/${status.id}/viewers`);
+          showToast(viewers.length ? `Viewed by: ${viewers.map((viewer) => viewer.fullName || viewer.username).join(', ')}` : 'No views yet.');
+        } catch (error) { showToast(error.message); }
+      }
+
+      let facePreviewStream = null;
+      function stopFacePreview() {
+        if (facePreviewStream) {
+          facePreviewStream.getTracks().forEach((track) => track.stop());
+          facePreviewStream = null;
+        }
+        const video = document.getElementById('face-video');
+        if (video) video.srcObject = null;
+        document.getElementById('face-modal').classList.add('hidden');
+      }
+
+      async function faceLogin() {
+        const modal = document.getElementById('face-modal');
+        const video = document.getElementById('face-video');
+        if (!navigator.mediaDevices?.getUserMedia) {
+          showToast('Camera preview is not supported by this browser.');
+          return;
+        }
+        try {
+          facePreviewStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+          video.srcObject = facePreviewStream;
+          modal.classList.remove('hidden');
+          showToast('This is only a camera preview. It does not verify your identity or sign you in.');
+        } catch (error) {
+          showToast('Camera access was unavailable. Check your browser permission and use HTTPS or localhost.');
+        }
+      }
+
+      loginForm.addEventListener('submit', submitLogin);
+      registerForm.addEventListener('submit', submitRegister);
+      toggleAuth.addEventListener('click', () => {
+        loginForm.classList.toggle('hidden');
+        registerForm.classList.toggle('hidden');
+        toggleAuth.textContent = loginForm.classList.contains('hidden') ? 'Back to login' : 'Create account';
+      });
+      document.getElementById('profile-btn').addEventListener('click', openProfileModal);
+      document.getElementById('notification-btn').addEventListener('click', async () => {
+        if (!state.currentUser) return;
+        try {
+          const notifications = await requestJson(`/api/notifications?userId=${state.currentUser.id}`);
+          showToast(notifications.length ? `You have ${notifications.length} notifications.` : 'No new notifications.');
+        } catch (error) {
+          showToast('Notifications are unavailable right now.');
+        }
+      });
+      document.getElementById('settings-nav-btn').addEventListener('click', openSettingsPanel);
+      document.getElementById('face-login-btn').addEventListener('click', faceLogin);
+      document.getElementById('forgot-password-btn').addEventListener('click', () => {
+        showToast('Password reset is not configured yet. Contact the site administrator for help.');
+      });
+      document.getElementById('help-center-btn').addEventListener('click', openHelpCenter);
+      document.getElementById('close-help-center').addEventListener('click', () => document.getElementById('help-center-modal').classList.add('hidden'));
+      document.getElementById('save-profile-btn').addEventListener('click', saveProfile);
+      document.getElementById('cancel-profile-btn').addEventListener('click', () => document.getElementById('profile-modal').classList.add('hidden'));
+      document.getElementById('save-settings-btn').addEventListener('click', saveUserSettings);
+      document.getElementById('cancel-settings-btn').addEventListener('click', () => document.getElementById('settings-modal').classList.add('hidden'));
+      document.getElementById('send-btn').addEventListener('click', sendMessage);
+      document.getElementById('message-input').addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' && !event.shiftKey) {
+          event.preventDefault();
+          sendMessage();
+        }
+      });
+      document.getElementById('logout-btn').addEventListener('click', logout);
+      document.getElementById('ai-assist-btn').addEventListener('click', triggerAiAssist);
+      document.getElementById('create-room-btn').addEventListener('click', createSmartRoom);
+      document.getElementById('create-group-btn').addEventListener('click', createGroupFromDashboard);
+      document.getElementById('create-story-btn').addEventListener('click', createStatus);
+      document.getElementById('settings-btn').addEventListener('click', openSettingsPanel);
+      document.getElementById('new-chat-btn').addEventListener('click', () => {
+        openQuickModal('Quick search', 'Search for a user by username or email', (target) => {
+          if (!target) return;
+          const match = state.users.find((user) => {
+            const identity = `${user.fullName || ''} ${user.username || ''} ${user.email || ''}`.toLowerCase();
+            return identity.includes(target.toLowerCase());
+          });
+          if (match) selectUser(match);
+        });
+      });
+      document.getElementById('toggle-status').addEventListener('click', () => {
+        document.getElementById('status-panel').classList.toggle('hidden');
+      });
+      document.getElementById('close-status-panel').addEventListener('click', () => {
+        document.getElementById('status-panel').classList.add('hidden');
+      });
+      document.getElementById('my-status-item').addEventListener('click', createStatus);
+      statusFeed.addEventListener('click', (event) => {
+        const item = event.target.closest('[data-status-index]');
+        if (item) openStatusViewer(Number(item.dataset.statusIndex));
+      });
+      document.getElementById('status-privacy').addEventListener('change', (event) => {
+        const needsPeople = ['selected', 'contacts_except'].includes(event.target.value);
+        document.getElementById('status-people').classList.toggle('hidden', !needsPeople);
+      });
+      document.getElementById('status-link').addEventListener('input', (event) => {
+        const preview = document.getElementById('status-link-preview');
+        preview.textContent = '';
+        try {
+          const link = new URL(event.target.value);
+          if (!['http:', 'https:'].includes(link.protocol)) throw new Error('Unsupported protocol');
+          const anchor = document.createElement('a');
+          anchor.href = link.href;
+          anchor.target = '_blank';
+          anchor.rel = 'noopener noreferrer';
+          anchor.textContent = `${link.hostname} · ${link.href}`;
+          preview.append(anchor);
+          preview.classList.remove('hidden');
+        } catch {
+          preview.classList.add('hidden');
+        }
+      });
+      document.getElementById('status-photo-btn').addEventListener('click', () => document.getElementById('status-photo-input').click());
+      document.getElementById('status-video-btn').addEventListener('click', () => document.getElementById('status-video-input').click());
+      document.getElementById('status-gif-btn').addEventListener('click', () => document.getElementById('status-gif-input').click());
+      document.getElementById('status-audio-btn').addEventListener('click', () => document.getElementById('status-audio-input').click());
+      document.getElementById('status-camera-photo-btn').addEventListener('click', () => document.getElementById('status-camera-photo-input').click());
+      document.getElementById('status-camera-video-btn').addEventListener('click', () => document.getElementById('status-camera-video-input').click());
+      ['status-photo-input', 'status-video-input', 'status-gif-input', 'status-audio-input', 'status-camera-photo-input', 'status-camera-video-input'].forEach((id) => {
+        document.getElementById(id).addEventListener('change', (event) => {
+          addStatusFiles(event.target.files);
+          event.target.value = '';
+        });
+      });
+      document.getElementById('status-voice-btn').addEventListener('click', () => startVoiceRecording('status'));
+      document.getElementById('status-emoji-btn').addEventListener('click', () => {
+        const caption = document.getElementById('status-caption');
+        const emojis = ['😊', '✨', '🔥', '🎉', '❤️', '👏'];
+        caption.value += emojis[Math.floor(Math.random() * emojis.length)];
+        caption.focus();
+      });
+      document.getElementById('status-sticker-btn').addEventListener('click', () => {
+        const caption = document.getElementById('status-caption');
+        const stickers = ['✨', '🌟', '🎉', '💬'];
+        caption.value += ` ${stickers[Math.floor(Math.random() * stickers.length)]} `;
+        caption.focus();
+      });
+      document.getElementById('status-publish-btn').addEventListener('click', publishStatus);
+      document.getElementById('status-cancel-btn').addEventListener('click', () => {
+        document.getElementById('status-editor-modal').classList.add('hidden');
+        clearStatusEditor();
+      });
+      document.getElementById('status-viewer-close').addEventListener('click', () => {
+        state.statusMediaUrls.forEach((url) => URL.revokeObjectURL(url));
+        state.statusMediaUrls = [];
+        document.getElementById('status-viewer-modal').classList.add('hidden');
+      });
+      document.getElementById('status-prev-btn').addEventListener('click', () => openStatusViewer(state.currentStatusIndex - 1));
+      document.getElementById('status-next-btn').addEventListener('click', () => openStatusViewer(state.currentStatusIndex + 1));
+      document.getElementById('status-reaction-btn').addEventListener('click', reactToCurrentStatus);
+      document.getElementById('status-reply-btn').addEventListener('click', replyToCurrentStatus);
+      document.getElementById('status-delete-btn').addEventListener('click', deleteCurrentStatus);
+      document.getElementById('status-viewers-btn').addEventListener('click', showStatusViewers);
+      function applyTheme(theme) {
+        const root = document.documentElement;
+        const selected = theme === 'light' ? 'light' : 'dark';
+        const isLight = selected === 'light';
+        const accent = document.getElementById('settings-accent')?.value || '#3478F6';
+        const wallpaper = document.getElementById('settings-wallpaper')?.value || '';
+        document.body.dataset.theme = selected;
+        root.style.setProperty('--accent', accent);
+        root.style.setProperty('--accent-strong', accent);
+        if (wallpaper) {
+          document.body.style.background = `linear-gradient(rgba(12, 20, 33, 0.72), rgba(12, 20, 33, 0.72)), url("${wallpaper}") center/cover no-repeat fixed`;
+        } else if (isLight) {
+          document.body.style.background = 'radial-gradient(circle at top left, rgba(25,212,169,0.18), transparent 30%), radial-gradient(circle at bottom right, rgba(0,120,255,0.08), transparent 35%), #F7F9FC';
+        } else {
+          document.body.style.background = 'radial-gradient(circle at top left, rgba(25,212,169,0.18), transparent 30%), radial-gradient(circle at bottom right, rgba(0,120,255,0.08), transparent 35%), #142B52';
+        }
+        if (isLight) {
+          root.style.setProperty('--bg-main', '#F7F9FC');
+          root.style.setProperty('--bg-panel', '#ffffff');
+          root.style.setProperty('--text-primary', '#142B52');
+          root.style.setProperty('--text-muted', '#4b5f7d');
+          root.style.setProperty('--bg-chat', '#ecf3ff');
+          root.style.setProperty('--incoming', '#ffffff');
+          document.body.style.color = '#142B52';
+          document.getElementById('toggle-theme').className = 'fa-solid fa-moon';
+        } else {
+          root.style.setProperty('--bg-main', '#142B52');
+          root.style.setProperty('--bg-panel', 'rgba(20, 43, 82, 0.96)');
+          root.style.setProperty('--text-primary', '#F7F9FC');
+          root.style.setProperty('--text-muted', '#D7E4FF');
+          root.style.setProperty('--bg-chat', '#0d1d38');
+          root.style.setProperty('--incoming', 'rgba(24, 39, 66, 0.98)');
+          document.body.style.color = '#F7F9FC';
+          document.getElementById('toggle-theme').className = 'fa-solid fa-sun';
+        }
+        localStorage.setItem('chimik-theme', selected);
+        const settingsTheme = document.getElementById('settings-theme');
+        if (settingsTheme) settingsTheme.value = selected;
+      }
+
+      document.getElementById('toggle-theme').addEventListener('click', async () => {
+        const nextTheme = document.body.dataset.theme === 'light' ? 'dark' : 'light';
+        applyTheme(nextTheme);
+        if (state.currentUser) {
+          try {
+            const settings = await requestJson(`/api/settings/${state.currentUser.id}`);
+            await requestJson(`/api/settings/${state.currentUser.id}`, {
+              method: 'POST',
+              body: JSON.stringify({
+                ...settings,
+                theme: nextTheme,
+              }),
+            });
+          } catch (error) {
+            // Ignore non-critical preference sync failures and keep the local UI state.
+          }
+        }
+      });
+
+      applyTheme(localStorage.getItem('chimik-theme') || 'dark');
+      const emojiChoices = ['😊', '😂', '👍', '🔥', '🎉', '❤️', '😍', '😎', '✨', '👏'];
+      document.getElementById('emoji-btn').addEventListener('click', () => {
+        const input = document.getElementById('message-input');
+        const emoji = emojiChoices[Math.floor(Math.random() * emojiChoices.length)];
+        input.value = (input.value + ' ' + emoji).trim();
+        input.focus();
+      });
+      document.getElementById('voice-btn').addEventListener('click', () => startVoiceRecording('message'));
+      document.getElementById('record-stop-btn').addEventListener('click', stopVoiceRecording);
+      document.getElementById('record-cancel-btn').addEventListener('click', cancelVoiceRecording);
+      document.getElementById('record-send-btn').addEventListener('click', sendRecordedVoice);
+      document.getElementById('sticker-btn').addEventListener('click', () => {
+        const stickers = ['✨', '🔥', '🎉', '💬', '👍'];
+        const sticker = stickers[Math.floor(Math.random() * stickers.length)];
+        const input = document.getElementById('message-input');
+        input.value = (input.value + ' ' + sticker).trim();
+        input.focus();
+      });
+      document.getElementById('clear-reply-btn').addEventListener('click', clearReplyPreview);
+      document.getElementById('clear-upload-btn').addEventListener('click', () => { state.pendingAttachment = null; updateUploadPreview(''); });
+      document.getElementById('voice-call-btn').addEventListener('click', () => {
+        if (!state.activeUser) return;
+        const modal = document.getElementById('call-modal');
+        const title = document.getElementById('call-title');
+        title.textContent = `Voice Call: ${state.activeUser.fullName || state.activeUser.username}`;
+        modal.classList.remove('hidden');
+      });
+      document.getElementById('video-call-btn').addEventListener('click', () => {
+        if (!state.activeUser) return;
+        const modal = document.getElementById('call-modal');
+        const title = document.getElementById('call-title');
+        title.textContent = `Video Call: ${state.activeUser.fullName || state.activeUser.username}`;
+        modal.classList.remove('hidden');
+      });
+      document.getElementById('end-call-btn').addEventListener('click', () => document.getElementById('call-modal').classList.add('hidden'));
+      document.getElementById('cancel-face').addEventListener('click', stopFacePreview);
+      document.getElementById('accept-face').addEventListener('click', stopFacePreview);
+      document.getElementById('quick-modal-cancel').addEventListener('click', () => {
+        document.getElementById('quick-modal').classList.add('hidden');
+      });
+      document.getElementById('mobile-back-btn')?.addEventListener('click', () => {
+        closeChat();
+      });
+      window.addEventListener('resize', () => {
+        if (window.innerWidth > 820) {
+          setMobileConversationView(false);
+        } else if (state.activeUser) {
+          setMobileConversationView(true);
+        } else {
+          setMobileConversationView(false);
+        }
+      });
+      document.getElementById('quick-modal-confirm').addEventListener('click', () => {
+        const input = document.getElementById('quick-modal-input');
+        const callback = state.quickAction;
+        document.getElementById('quick-modal').classList.add('hidden');
+        if (typeof callback === 'function') callback(input.value.trim());
+      });
+      document.querySelectorAll('.mobile-nav-btn').forEach((button) => {
+        button.addEventListener('click', () => {
+          document.querySelectorAll('.mobile-nav-btn').forEach((btn) => btn.classList.toggle('active', btn === button));
+          const view = button.dataset.view;
+          if (view === 'chats') {
+            setMobileConversationView(Boolean(state.activeUser && window.innerWidth <= 820));
+          }
+          if (view === 'calls') {
+            showToast('Calls are available from the active conversation header.');
+          }
+          if (view === 'stories') {
+            document.getElementById('status-panel').classList.remove('hidden');
+            loadStatuses().catch((error) => showToast(error.message));
+          }
+          if (view === 'communities') {
+            createGroupFromDashboard();
+          }
+          if (view === 'settings') {
+            openSettingsPanel();
+          }
+        });
+      });
+      window.addEventListener('resize', () => {
+        setMobileConversationView(Boolean(state.activeUser && window.innerWidth <= 820));
+      });
+      searchInput.addEventListener('input', renderContacts);
+      document.querySelectorAll('.filter-btn').forEach((button) => {
+        button.addEventListener('click', () => {
+          state.currentFilter = button.dataset.filter;
+          document.querySelectorAll('.filter-btn').forEach((btn) => btn.classList.toggle('active', btn === button));
+          renderContacts();
+        });
+      });
+
+      state.socket.on('message:new', async (message) => {
+        if (!state.currentUser) return;
+        const targetMatches = Number(message.senderId) === Number(state.activeUser?.id) || Number(message.recipientId) === Number(state.activeUser?.id);
+        if (targetMatches) {
+          await loadMessages();
+        }
+      });
+
+      state.socket.on('status:update', async () => {
+        if (state.currentUser) {
+          await loadStatuses();
+        }
+      });
+
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch(() => {
+            // service worker is optional in unsupported environments
+          });
+        });
+      }
+
+      (async function init() {
+        let savedUser = null;
+        try { savedUser = JSON.parse(localStorage.getItem('chimik-user') || 'null'); }
+        catch { localStorage.removeItem('chimik-user'); }
+        if (savedUser && state.sessionToken) {
+          try {
+            const session = await requestJson('/api/me');
+            const restoredUser = session.user || session;
+            if (!restoredUser || Number(restoredUser.id) !== Number(savedUser.id)) {
+              throw new Error('Saved session does not match this account.');
+            }
+            await loginUser(restoredUser, state.sessionToken);
+          } catch {
+            state.sessionToken = '';
+            localStorage.removeItem('chimik-session');
+            localStorage.removeItem('chimik-user');
+          }
+        } else if (savedUser) {
+          localStorage.removeItem('chimik-user');
+        }
+      })();
+      /* =========================================================
+   CHIMIC CONNECT — CHIMIC AI CHAT
+   Uses the existing /api/ai backend endpoint.
+   Add before the closing  tag.
+   ========================================================= */
+
+(function initialiseChimicAIChat() {
+  const aiButton = document.getElementById('ai-assist-btn');
+  const chatPanel = document.querySelector('.chat-panel');
+  const messagesArea = document.getElementById('messages');
+  const composer = document.querySelector('.composer-shell');
+
+  if (!aiButton || !chatPanel || !messagesArea || !composer) {
+    console.error('Chimic AI: Required chat elements were not found.');
+    return;
+  }
+
+  let aiHistory = [];
+  let aiBusy = false;
+  let aiOpen = false;
+
+  const originalHeader = document.querySelector('.chat-header');
+  const originalHeaderHTML = originalHeader
+    ? originalHeader.innerHTML
+    : '';
+
+  const aiPanel = document.createElement('section');
+  aiPanel.id = 'chimic-ai-panel';
+
+  aiPanel.style.cssText = `
+    display:none;
+    flex:1;
+    min-height:0;
+    flex-direction:column;
+    background:#0f1d35;
+    color:#f7f9fc;
+    overflow:hidden;
+  `;
+
+  aiPanel.innerHTML = `
+    <div style="
+      padding:14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      background:#142b52;
+      border-bottom:1px solid rgba(255,255,255,.1);
+    ">
+      <div>
+        <strong style="font-size:17px;">✦ Chimic AI</strong>
+        <div style="font-size:12px;color:#b9d0f5;">
+          Your AI assistant
+        </div>
+      </div>
+
+      <button id="chimic-ai-back" type="button" style="
+        padding:9px 13px;
+        border:1px solid rgba(255,255,255,.2);
+        border-radius:9px;
+        background:rgba(255,255,255,.08);
+        color:white;
+        cursor:pointer;
+      ">← Back to chats</button>
+    </div>
+
+    <div id="chimic-ai-messages" style="
+      flex:1;
+      min-height:0;
+      overflow-y:auto;
+      padding:16px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    ">
+      <div style="
+        max-width:85%;
+        padding:13px;
+        border-radius:14px;
+        background:#1c2a45;
+        line-height:1.5;
+      ">
+        <strong>Chimic AI</strong>
+        <p style="margin:6px 0 0;">
+          Hello! I'm Chimic AI. What would you like help with today?
+        </p>
+      </div>
+    </div>
+
+    <div style="
+      padding:12px;
+      background:#142b52;
+      border-top:1px solid rgba(255,255,255,.1);
+    ">
+      <label style="
+        display:flex;
+        align-items:flex-start;
+        gap:8px;
+        font-size:12px;
+        color:#d7e4ff;
+        margin-bottom:10px;
+      ">
+        <input id="chimic-ai-consent" type="checkbox">
+        I agree to send my messages to the AI service to receive replies.
+      </label>
+
+      <form id="chimic-ai-form" style="
+        display:flex;
+        gap:8px;
+      ">
+        <input
+          id="chimic-ai-input"
+          type="text"
+          placeholder="Message Chimic AI..."
+          autocomplete="off"
+          maxlength="4000"
+          style="
+            flex:1;
+            min-width:0;
+            padding:12px;
+            border-radius:12px;
+            border:1px solid rgba(255,255,255,.15);
+            background:#09172d;
+            color:white;
+          "
+        >
+
+        <button
+          id="chimic-ai-send"
+          type="submit"
+          style="
+            padding:0 17px;
+            border:0;
+            border-radius:12px;
+            background:#3478f6;
+            color:white;
+            cursor:pointer;
+            font-weight:bold;
+          "
+        >Send</button>
+      </form>
+
+      <div style="
+        margin-top:8px;
+        font-size:11px;
+        color:#a9bfdf;
+      ">
+        Don't share passwords, private keys or sensitive personal information.
+      </div>
+    </div>
+  `;
+
+  chatPanel.appendChild(aiPanel);
+
+  const aiMessages = aiPanel.querySelector('#chimic-ai-messages');
+  const aiForm = aiPanel.querySelector('#chimic-ai-form');
+  const aiInput = aiPanel.querySelector('#chimic-ai-input');
+  const aiSend = aiPanel.querySelector('#chimic-ai-send');
+  const aiConsent = aiPanel.querySelector('#chimic-ai-consent');
+  const aiBack = aiPanel.querySelector('#chimic-ai-back');
+
+  function addAIMessage(sender, message, type = 'incoming') {
+    const bubble = document.createElement('div');
+
+    bubble.style.cssText = `
+      align-self:${type === 'outgoing' ? 'flex-end' : 'flex-start'};
+      max-width:85%;
+      padding:12px 14px;
+      border-radius:14px;
+      background:${type === 'outgoing' ? '#285fdb' : '#1c2a45'};
+      color:white;
+      line-height:1.5;
+      overflow-wrap:anywhere;
+      white-space:pre-wrap;
+    `;
+
+    const name = document.createElement('strong');
+    name.textContent = sender;
+
+    const content = document.createElement('div');
+    content.textContent = message;
+    content.style.marginTop = '5px';
+
+    bubble.append(name, content);
+    aiMessages.appendChild(bubble);
+    aiMessages.scrollTop = aiMessages.scrollHeight;
+
+    return bubble;
+  }
+
+  function openAIChat() {
+    aiOpen = true;
+
+    messagesArea.style.display = 'none';
+    composer.style.display = 'none';
+    aiPanel.style.display = 'flex';
+
+    if (originalHeader) {
+      originalHeader.innerHTML = `
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="
+            width:42px;
+            height:42px;
+            display:grid;
+            place-items:center;
+            border-radius:50%;
+            background:#3478f6;
+            font-size:21px;
+          ">✦</div>
+          <div>
+            <h3 style="margin:0;">Chimic AI</h3>
+            <small>AI assistant</small>
+          </div>
+        </div>
+      `;
+    }
+
+    document.body.classList.add('chat-open');
+    aiInput.focus();
+  }
+
+  function closeAIChat() {
+    aiOpen = false;
+
+    aiPanel.style.display = 'none';
+    messagesArea.style.display = '';
+    composer.style.display = '';
+
+    if (originalHeader) {
+      originalHeader.innerHTML = originalHeaderHTML;
+    }
+
+    document.body.classList.remove('chat-open');
+  }
+
+  async function askChimicAI(message) {
+    if (typeof requestJson !== 'function') {
+      throw new Error('The website requestJson helper was not found.');
+    }
+
+    const response = await requestJson('/api/ai', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message,
+        history: aiHistory,
+        consent: true
+      })
+    });
+
+    const answer = response.reply || response.answer;
+
+    if (!answer) {
+      throw new Error('Chimic AI returned an empty response.');
+    }
+
+    return String(answer);
+  }
+
+  async function sendAIMessage(event) {
+    event.preventDefault();
+
+    const message = aiInput.value.trim();
+
+    if (!message || aiBusy) return;
+
+    if (!aiConsent.checked) {
+      addAIMessage(
+        'Chimic AI',
+        'Please tick the consent box before sending a message.'
+      );
+      return;
+    }
+
+    if (message.length > 4000) {
+      addAIMessage(
+        'Chimic AI',
+        'Your message is too long. Please shorten it.'
+      );
+      return;
+    }
+
+    aiBusy = true;
+    aiSend.disabled = true;
+    aiInput.disabled = true;
+
+    aiInput.value = '';
+
+    addAIMessage('You', message, 'outgoing');
+
+    const typing = addAIMessage(
+      'Chimic AI',
+      'Chimic AI is preparing a reply...'
+    );
+
+    try {
+      const reply = await askChimicAI(message);
+
+      typing.remove();
+
+      addAIMessage('Chimic AI', reply);
+
+      aiHistory.push(
+        { role: 'user', content: message },
+        { role: 'assistant', content: reply }
+      );
+
+      // Keep conversation history within a reasonable size.
+      if (aiHistory.length > 20) {
+        aiHistory = aiHistory.slice(-20);
+      }
+
+    } catch (error) {
+      typing.remove();
+
+      addAIMessage(
+        'Chimic AI',
+        error.message || 'Unable to contact Chimic AI. Please try again.'
+      );
+
+      console.error('Chimic AI error:', error);
+
+    } finally {
+      aiBusy = false;
+      aiSend.disabled = false;
+      aiInput.disabled = false;
+      aiInput.focus();
+    }
+  }
+
+  aiButton.addEventListener('click', openAIChat);
+  aiBack.addEventListener('click', closeAIChat);
+  aiForm.addEventListener('submit', sendAIMessage);
+
+  console.log('Chimic AI chat interface initialised.');
+})();
+    </script>
+  </body>
+</html>
